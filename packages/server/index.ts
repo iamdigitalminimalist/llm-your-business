@@ -1,16 +1,15 @@
-import express, { type Request, type Response } from 'express';
+import express from 'express';
+import dotenv from 'dotenv';
+import router from './routes';
+
+dotenv.config();
 
 const app = express();
+app.use(express.json());
+app.use(router);
+
 const port = process.env.PORT || 3000;
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello via Express!!');
-});
-
-app.get('/api/hello', (req: Request, res: Response) => {
-  res.json({ message: 'Hello from the server!' });
-});
-
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running at http://localhost:${port}`);
 });

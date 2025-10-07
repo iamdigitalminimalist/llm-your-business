@@ -1,5 +1,4 @@
 import {
-  PrismaClient,
   PartnerType,
   ProductType,
   ObjectiveCategory,
@@ -7,11 +6,12 @@ import {
   LLMModel,
   EvaluationStatus,
 } from '../generated/prisma';
-
-const prisma = new PrismaClient();
+import { prisma, connectDatabase, disconnectDatabase } from '../lib/db';
 
 async function main() {
   console.log('🌱 Starting database seeding...');
+
+  await connectDatabase();
 
   try {
     await prisma.evaluation.deleteMany();
@@ -226,5 +226,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await disconnectDatabase();
   });
