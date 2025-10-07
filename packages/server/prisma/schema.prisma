@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum PartnerType {
+  RESTAURANT
+  TECH
+  RETAIL
+  SERVICE
+  HEALTHCARE
+  EDUCATION
+  OTHER
+}
+
+enum MarketingSegment {
+  LOCAL
+  NATIONAL
+  INTERNATIONAL
+  B2B
+  B2C
+}
+
+enum ProductType {
+  PHYSICAL_PRODUCT
+  SERVICE_LOCATION
+  DIGITAL_SERVICE
+  EXPERIENCE
+}
+
+enum ObjectiveCategory {
+  MARKET_COMPETITION // Restaurant rankings, competitor analysis
+  BRAND_PERCEPTION // How attractive is the brand/product
+  EMPLOYEE_SENTIMENT // What employees think about the company
+  CUSTOMER_SATISFACTION // Customer experience and satisfaction
+  PRODUCT_QUALITY // Product/service quality assessment
+  MARKET_POSITION // Market positioning and reputation
+  INNOVATION_RATING // Innovation and uniqueness
+  VALUE_PROPOSITION // Price-to-value perception
+}
+
+enum ObjectiveScope {
+  GLOBAL // Worldwide comparison
+  REGIONAL // Continental/regional scope
+  NATIONAL // Country-specific
+  LOCAL // City/local area
+  INDUSTRY // Industry-specific comparison
+  NICHE // Specific market segment
+}
+
+enum TargetAudience {
+  GENERAL_PUBLIC // General consumers/public
+  CUSTOMERS // Existing/potential customers
+  EMPLOYEES // Current/former employees
+  INDUSTRY_EXPERTS // Industry professionals/experts
+  COMPETITORS // Competitor analysis perspective
+  INVESTORS // Investment/business perspective
+  MEDIA_PRESS // Media and press perspective
+}
+
+enum LLMModel {
+  GPT_4O
+  GPT_4O_MINI
+  CLAUDE_3_5_SONNET
+  GEMINI_PRO
+}
+
+enum EvaluationStatus {
+  PENDING // Evaluation request submitted but not processed
+  IN_PROGRESS // Currently being processed by LLM
+  COMPLETED // Successfully completed
+  FAILED // Failed to complete (error occurred)
+  CANCELLED // Manually cancelled
+  TIMEOUT // Request timed out
+}
+
+model Partner {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  publicId String @unique @default(cuid())
+
+  // Basic Information
+  name        String      @unique
+  description String?
+  partnerType PartnerType
+
+  // Contact & Location
+  website      String?
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  country      String
+  postalCode   String?
+
+  // Market Information
+  industry String?
+
+  // Status
+  isActive Boolean @default(true)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  products    Product[]
+  objectives  Objective[]
+  evaluations Evaluation[]
+
+  @@map("partners")
+}
+
+model Product {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  publicId String @unique @default(cuid())
+
+  name        String
+  description String?
+  productType ProductType
+
+  // Pricing (flexible for different types)
+  price      Float? // Base price, starting price, or null for location-based pricing
+  priceRange String? // "€50-150", "Starting from €99", etc.
+  currency   String  @default("EUR")
+
+  // Location
+  city    String?
+  country String?
+
+  // Status
+  isActive Boolean @default(true)
+
+  // Relations
+  partnerId   String       @db.ObjectId
+  partner     Partner      @relation(fields: [partnerId], references: [id])
+  objectives  Objective[]
+  evaluations Evaluation[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("products")
+}
+
+model Objective {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  publicId String @unique @default(cuid())
+
+  // Basic Information
+  title    String
+  question String // Generic prompt with placeholders like {industry}, {scope}
+  category ObjectiveCategory
+  scope    ObjectiveScope // Defines the geographical/market scope
+
+  // Configuration
+  isActive Boolean @default(true)
+
+  // Relations - can be linked to specific partner or product, or be generic
+  partnerId String?  @db.ObjectId // Optional: specific to a partner
+  partner   Partner? @relation(fields: [partnerId], references: [id])
+
+  productId String?  @db.ObjectId // Optional: specific to a product
+  product   Product? @relation(fields: [productId], references: [id])
+
+  // Relations
+  evaluations Evaluation[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("objectives")
+}
+
+model Evaluation {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  publicId String @unique @default(cuid())
+
+  // LLM Details
+  llmModel LLMModel // Which LLM model was used
+  prompt   String // The actual prompt sent to LLM
+  response String // LLM response
+
+  // Results
+  score        Float? // Calculated score
+  mentionFound Boolean @default(false) // Was partner/product mentioned?
+
+  // Status
+  status EvaluationStatus @default(PENDING)
+
+  // Relations
+  objectiveId String    @db.ObjectId // Required: which objective was evaluated
+  objective   Objective @relation(fields: [objectiveId], references: [id])
+
+  partnerId String?  @db.ObjectId // Optional: if evaluation is partner-specific
+  partner   Partner? @relation(fields: [partnerId], references: [id])
+
+  productId String?  @db.ObjectId // Optional: if evaluation is product-specific
+  product   Product? @relation(fields: [productId], references: [id])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("evaluations")
+}

@@ -5,7 +5,10 @@
   "private": true,
   "scripts": {
     "start": "bun run index.ts",
-    "dev": "bun run --watch index.ts"
+    "dev": "bun run --watch index.ts",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "bun run prisma/seed.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
