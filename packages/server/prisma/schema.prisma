@@ -33,36 +33,6 @@ enum ProductType {
   EXPERIENCE
 }
 
-enum ObjectiveCategory {
-  MARKET_COMPETITION // Restaurant rankings, competitor analysis
-  BRAND_PERCEPTION // How attractive is the brand/product
-  EMPLOYEE_SENTIMENT // What employees think about the company
-  CUSTOMER_SATISFACTION // Customer experience and satisfaction
-  PRODUCT_QUALITY // Product/service quality assessment
-  MARKET_POSITION // Market positioning and reputation
-  INNOVATION_RATING // Innovation and uniqueness
-  VALUE_PROPOSITION // Price-to-value perception
-}
-
-enum ObjectiveScope {
-  GLOBAL // Worldwide comparison
-  REGIONAL // Continental/regional scope
-  NATIONAL // Country-specific
-  LOCAL // City/local area
-  INDUSTRY // Industry-specific comparison
-  NICHE // Specific market segment
-}
-
-enum TargetAudience {
-  GENERAL_PUBLIC // General consumers/public
-  CUSTOMERS // Existing/potential customers
-  EMPLOYEES // Current/former employees
-  INDUSTRY_EXPERTS // Industry professionals/experts
-  COMPETITORS // Competitor analysis perspective
-  INVESTORS // Investment/business perspective
-  MEDIA_PRESS // Media and press perspective
-}
-
 enum LLMModel {
   GPT_4O
   GPT_4O_MINI
@@ -153,20 +123,19 @@ model Objective {
   publicId String @unique @default(cuid())
 
   // Basic Information
-  title    String
-  question String // Generic prompt with placeholders like {industry}, {scope}
-  category ObjectiveCategory
-  scope    ObjectiveScope // Defines the geographical/market scope
+  title     String
+  question  String // Final question ready to be sent to LLM
+  llmModels LLMModel[] // Array of LLM models to use for evaluation
+
+  // Required Relations
+  partnerId String  @db.ObjectId // Required: specific to a partner
+  partner   Partner @relation(fields: [partnerId], references: [id])
+
+  productId String  @db.ObjectId // Required: specific to a product
+  product   Product @relation(fields: [productId], references: [id])
 
   // Configuration
   isActive Boolean @default(true)
-
-  // Relations - can be linked to specific partner or product, or be generic
-  partnerId String?  @db.ObjectId // Optional: specific to a partner
-  partner   Partner? @relation(fields: [partnerId], references: [id])
-
-  productId String?  @db.ObjectId // Optional: specific to a product
-  product   Product? @relation(fields: [productId], references: [id])
 
   // Relations
   evaluations Evaluation[]
@@ -187,9 +156,19 @@ model Evaluation {
   prompt   String // The actual prompt sent to LLM
   response String // LLM response
 
-  // Results
-  score        Float? // Calculated score
+  // Basic Results
+  score        Float? // Overall score (0-10)
   mentionFound Boolean @default(false) // Was partner/product mentioned?
+
+  // Structured Analysis Results
+  ranking                  Int? // Position in ranking (e.g., 3 for 3rd place)
+  totalCompetitors         Int? // Total number of competitors mentioned
+  recommendationLikelihood Int? // Percentage likelihood (0-100) of recommendation
+  competitiveStrengths     String[] // Array of key strengths
+  competitiveWeaknesses    String[] // Array of weaknesses/areas for improvement
+  marketPosition           String? // Description of market position
+  keyDifferentiators       String[] // What sets them apart from competitors
+  evaluation               String? // The detailed evaluation text
 
   // Status
   status EvaluationStatus @default(PENDING)

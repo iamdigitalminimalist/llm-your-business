@@ -1,11 +1,4 @@
-import {
-  PartnerType,
-  ProductType,
-  ObjectiveCategory,
-  ObjectiveScope,
-  LLMModel,
-  EvaluationStatus,
-} from '../generated/prisma';
+import { PartnerType, ProductType, LLMModel } from '../generated/prisma';
 import { prisma, connectDatabase, disconnectDatabase } from '../lib/db';
 
 async function main() {
@@ -39,7 +32,6 @@ async function main() {
     },
   });
 
-  // 2. Create Vabali Spa Partner
   const vabaliSpa = await prisma.partner.create({
     data: {
       name: 'Vabali Spa',
@@ -55,9 +47,24 @@ async function main() {
     },
   });
 
-  console.log('✅ Created partners: Remarkable & Vabali Spa');
+  const friedrichsbad = await prisma.partner.create({
+    data: {
+      name: 'Friedrichsbad Spa',
+      description:
+        'Historic Roman-Irish bathhouse with over 145 years of bathing tradition in Baden-Baden',
+      partnerType: PartnerType.SERVICE,
+      website: 'https://friedrichsbad.eu',
+      addressLine1: 'Römerplatz 1',
+      city: 'Baden-Baden',
+      country: 'Germany',
+      postalCode: '76530',
+      industry: 'Historic Spa & Wellness',
+      isActive: true,
+    },
+  });
 
-  // 3. Create Remarkable Products
+  console.log('✅ Created partners: Remarkable, Vabali Spa & Friedrichsbad');
+
   const remarkable2 = await prisma.product.create({
     data: {
       name: 'reMarkable 2',
@@ -86,7 +93,6 @@ async function main() {
     },
   });
 
-  // 4. Create Vabali Spa Locations (Berlin, Hamburg, Düsseldorf)
   const vabaliBerlin = await prisma.product.create({
     data: {
       name: 'Vabali Spa Berlin',
@@ -132,91 +138,112 @@ async function main() {
     },
   });
 
-  console.log('✅ Created products for both partners');
-
-  // 5. Create Generic Objectives (Decoupled from Partners)
-
-  // Generic market competition ranking
-  const marketRanking = await prisma.objective.create({
+  const friedrichsbadBath = await prisma.product.create({
     data: {
-      title: 'Top Businesses',
-      question:
-        'What are the best 15 businesses in the {industry} industry within {scope}? Please rank them by facilities, service quality, and overall experience.',
-      category: ObjectiveCategory.MARKET_COMPETITION,
-      scope: ObjectiveScope.NATIONAL,
+      name: 'Friedrichsbad Roman-Irish Bath',
+      description:
+        'Historic Renaissance-style bathhouse offering the authentic Roman-Irish bathing ritual with thermal waters, UNESCO World Heritage site',
+      productType: ProductType.SERVICE_LOCATION,
+      price: 38.0,
+      currency: 'EUR',
+      city: 'Baden-Baden',
+      country: 'Germany',
       isActive: true,
+      partnerId: friedrichsbad.id,
     },
   });
 
-  // Generic brand perception
-  const brandPerception = await prisma.objective.create({
+  console.log('✅ Created products for all partners');
+
+  // Market competition
+  const vabaliBerlinMarketRanking = await prisma.objective.create({
     data: {
-      title: 'Brand Attractiveness',
+      title: 'Top Spa Businesses in Germany',
       question:
-        'How attractive and innovative is the {partner_name} brand compared to other {industry} solutions? What makes it stand out in the market within {scope}?',
-      category: ObjectiveCategory.BRAND_PERCEPTION,
-      scope: ObjectiveScope.NATIONAL,
-      isActive: true,
-    },
-  });
-
-  // Generic customer satisfaction
-  const customerSatisfaction = await prisma.objective.create({
-    data: {
-      title: 'Customer Experience',
-      question:
-        'What do customers think about {partner_name}? How would you rate the overall customer satisfaction and experience quality in the {industry} sector?',
-      category: ObjectiveCategory.CUSTOMER_SATISFACTION,
-      scope: ObjectiveScope.LOCAL,
-      isActive: true,
-    },
-  });
-
-  // Generic product quality assessment
-  const productQuality = await prisma.objective.create({
-    data: {
-      title: 'Product Quality',
-      question:
-        'How would you evaluate the quality of {partner_name} products/services compared to competitors in the {industry} market within {scope}?',
-      category: ObjectiveCategory.PRODUCT_QUALITY,
-      scope: ObjectiveScope.NATIONAL,
-      isActive: true,
-    },
-  });
-
-  console.log('✅ Created generic evaluation objectives');
-
-  // 6. Create Sample Evaluation (demonstrating dynamic context replacement)
-  // When used with Vabali Spa, the placeholders would be replaced:
-  // {industry} -> "Wellness & Spa"
-  // {scope} -> "Germany" (from partner.country)
-  // {partner_name} -> "Vabali Spa"
-
-  const sampleEvaluation = await prisma.evaluation.create({
-    data: {
-      llmModel: LLMModel.GPT_4O,
-      prompt:
-        'What are the best 15 businesses in the Wellness & Spa industry within Germany? Please rank them by facilities, service quality, and overall experience.',
-      response: `Here are the top 15 wellness and spa businesses in Germany:
-
-1. **Vabali Spa** (Berlin, Hamburg, Düsseldorf) - Exceptional Balinese design, premium experience
-2. **Therme Erding** (Munich area) - Europe's largest thermal spa complex
-3. **Friedrichsbad** (Baden-Baden) - Historic Roman-Irish bathhouse
-4. **Claudius Therme** (Cologne) - Modern thermal spa with mineral-rich waters
-5. **Liquidrom** (Berlin) - Unique floating sound experience
-...
-
-Vabali Spa leads with its authentic atmosphere and consistent quality across all German locations.`,
-      score: 10.0,
-      mentionFound: true,
-      status: EvaluationStatus.COMPLETED,
-      objectiveId: marketRanking.id,
+        'What are the best 15 spa and wellness businesses in Germany? Please rank them by facilities, service quality, and overall customer experience.',
+      llmModels: [LLMModel.GPT_4O, LLMModel.GPT_4O_MINI],
       partnerId: vabaliSpa.id,
       productId: vabaliBerlin.id,
+      isActive: true,
     },
   });
 
-  console.log('✅ Created sample evaluation demonstrating context replacement');
+  const vabaliDusseldorfMarketRanking = await prisma.objective.create({
+    data: {
+      title: 'Top Spa Businesses in Germany',
+      question:
+        'What are the best 15 spa and wellness businesses in Germany? Please rank them by facilities, service quality, and overall customer experience.',
+      llmModels: [LLMModel.GPT_4O, LLMModel.GPT_4O_MINI],
+      partnerId: vabaliSpa.id,
+      productId: vabaliDusseldorf.id,
+      isActive: true,
+    },
+  });
+
+  const vabaliHamburgMarketRanking = await prisma.objective.create({
+    data: {
+      title: 'Top Spa Businesses in Germany',
+      question:
+        'What are the best 15 spa and wellness businesses in Germany? Please rank them by facilities, service quality, and overall customer experience.',
+      llmModels: [LLMModel.GPT_4O, LLMModel.GPT_4O_MINI],
+      partnerId: vabaliSpa.id,
+      productId: vabaliHamburg.id,
+      isActive: true,
+    },
+  });
+
+  const friedrichsbadMarketPosition = await prisma.objective.create({
+    data: {
+      title: 'Premier Historic Spa Destinations in Germany',
+      question:
+        'What are the best 15 spa and wellness businesses in Germany? Please rank them by facilities, service quality, and overall customer experience.',
+      llmModels: [LLMModel.GPT_4O, LLMModel.GPT_4O_MINI],
+      partnerId: friedrichsbad.id,
+      productId: friedrichsbadBath.id,
+      isActive: true,
+    },
+  });
+
+  // Brand perception
+  const vabaliBrandPerception = await prisma.objective.create({
+    data: {
+      title: 'Vabali Spa Brand Attractiveness',
+      question:
+        'How attractive and innovative is the Vabali Spa brand compared to other wellness and spa solutions in Germany? What makes it stand out in the market?',
+      llmModels: [LLMModel.GPT_4O, LLMModel.GPT_4O_MINI],
+      partnerId: vabaliSpa.id,
+      productId: vabaliBerlin.id,
+      isActive: true,
+    },
+  });
+
+  // Customer satisfaction
+  const remarkableCustomerSatisfaction = await prisma.objective.create({
+    data: {
+      title: 'ReMarkable Customer Experience',
+      question:
+        'What do customers think about reMarkable tablets? How would you rate the overall customer satisfaction and experience quality in the digital note-taking sector?',
+      llmModels: [LLMModel.GPT_4O, LLMModel.GPT_4O_MINI],
+      partnerId: remarkable.id,
+      productId: remarkablePaperPro.id,
+      isActive: true,
+    },
+  });
+
+  // Product quality assessment
+  const remarkableProductQuality = await prisma.objective.create({
+    data: {
+      title: 'Digital Note-taking Tablet Quality',
+      question:
+        'How would you evaluate the quality of the reMarkable 2 digital paper tablet compared to competitors like iPad, Samsung Galaxy Tab, and other e-ink tablets in the market?',
+      llmModels: [LLMModel.GPT_4O, LLMModel.GPT_4O_MINI],
+      partnerId: remarkable.id,
+      productId: remarkable2.id,
+      isActive: true,
+    },
+  });
+
+  console.log('✅ Created partner-specific evaluation objectives');
   console.log('🎉 Seeding completed successfully!');
 }
 

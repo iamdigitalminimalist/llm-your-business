@@ -1,22 +1,32 @@
 import { prisma } from '../lib/db';
+import type { LLMModel, EvaluationStatus } from '../generated/prisma';
 
-interface EvaluationFilters {
+interface CreateEvaluationData {
+  llmModel: LLMModel;
+  prompt: string;
+  response: string;
+  mentionFound: boolean;
+  status: EvaluationStatus;
+  objectiveId: string;
   partnerId?: string;
   productId?: string;
-  objectiveId?: string;
+  score?: number;
+  ranking?: number;
+  totalCompetitors?: number;
+  recommendationLikelihood?: number;
+  competitiveStrengths?: string[];
+  competitiveWeaknesses?: string[];
+  marketPosition?: string;
+  keyDifferentiators?: string[];
+  evaluation?: string;
 }
 
 export const evaluationRepository = {
-  getEvaluations: async (filters: EvaluationFilters = {}) => {
+  getEvaluations: async () => {
     return prisma.evaluation.findMany({
-      where: {
-        ...(filters.partnerId && { partnerId: filters.partnerId }),
-        ...(filters.productId && { productId: filters.productId }),
-        ...(filters.objectiveId && { objectiveId: filters.objectiveId }),
-      },
       include: {
         objective: {
-          select: { id: true, title: true, category: true },
+          select: { id: true, title: true },
         },
         partner: {
           select: { id: true, name: true, publicId: true },
@@ -27,6 +37,22 @@ export const evaluationRepository = {
       },
       orderBy: {
         createdAt: 'desc',
+      },
+    });
+  },
+  createEvaluation: async (data: CreateEvaluationData) => {
+    return prisma.evaluation.create({
+      data,
+      include: {
+        objective: {
+          select: { id: true, title: true },
+        },
+        partner: {
+          select: { id: true, name: true, publicId: true },
+        },
+        product: {
+          select: { id: true, name: true, publicId: true },
+        },
       },
     });
   },

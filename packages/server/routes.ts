@@ -28,5 +28,6 @@ router.get('/api/objectives', objectiveController.getObjectives);
 
 // Evaluation routes
 router.get('/api/evaluations', evaluationController.getEvaluations);
+router.post('/api/evaluation', evaluationController.createEvaluation);
 
 export default router;
