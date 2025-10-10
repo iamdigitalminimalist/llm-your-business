@@ -42,25 +42,37 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --radius: 1rem;
+
+  /* Scandinavian Color Palette */
+  --scandi-warm-white: #fefcf8;
+  --scandi-light-gray: #f5f5f2;
+  --scandi-soft-gray: #e8e7e3;
+  --scandi-medium-gray: #c5c4c0;
+  --scandi-dark-gray: #3a3a37;
+  --scandi-teak-orange: #d2691e;
+  --scandi-forest-green: #2f4f2f;
+  --scandi-soft-blue: #4a90a4;
+  --scandi-sage-green: #9baa9b;
+
+  --background: var(--scandi-warm-white);
+  --foreground: var(--scandi-dark-gray);
+  --card: var(--scandi-warm-white);
+  --card-foreground: var(--scandi-dark-gray);
+  --popover: var(--scandi-warm-white);
+  --popover-foreground: var(--scandi-dark-gray);
+  --primary: var(--scandi-teak-orange);
+  --primary-foreground: var(--scandi-warm-white);
+  --secondary: var(--scandi-light-gray);
+  --secondary-foreground: var(--scandi-dark-gray);
+  --muted: var(--scandi-soft-gray);
+  --muted-foreground: #6b6b68;
+  --accent: var(--scandi-soft-blue);
+  --accent-foreground: var(--scandi-warm-white);
+  --destructive: #b85450;
+  --border: var(--scandi-medium-gray);
+  --input: var(--scandi-soft-gray);
+  --ring: var(--scandi-teak-orange);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -116,5 +128,40 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+}
+
+@layer components {
+  .scandi-card {
+    @apply bg-white rounded-2xl shadow-sm border border-stone-200;
+  }
+
+  .scandi-card-soft {
+    @apply bg-stone-50/50 rounded-xl shadow-none border-0;
+  }
+
+  .scandi-button-primary {
+    @apply bg-orange-600 hover:bg-orange-700 text-white rounded-xl px-6 py-3 font-medium transition-colors;
+  }
+
+  .scandi-button-secondary {
+    @apply bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl px-6 py-3 font-medium transition-colors;
+  }
+
+  .scandi-text-primary {
+    @apply text-stone-800;
+  }
+
+  .scandi-text-secondary {
+    @apply text-stone-600;
+  }
+
+  .scandi-text-muted {
+    @apply text-stone-500;
   }
 }
