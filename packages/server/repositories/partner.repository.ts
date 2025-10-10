@@ -10,6 +10,9 @@ export const partnerRepository = {
         name: true,
         isActive: true,
         createdAt: true,
+        partnerType: true,
+        industry: true,
+        country: true,
       },
     });
   },

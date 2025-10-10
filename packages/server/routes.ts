@@ -3,6 +3,7 @@ import { partnerController } from './controllers/partner.controller';
 import { productController } from './controllers/product.controller';
 import { objectiveController } from './controllers/objective.controller';
 import { evaluationController } from './controllers/evaluation.controller';
+import { dashboardController } from './controllers/dashboard.controller';
 
 const router = express.Router();
 
@@ -14,6 +15,13 @@ router.get('/', (req: Request, res: Response) => {
 router.get('/api/hello', (req: Request, res: Response) => {
   res.json({ message: 'Hello from the server!' });
 });
+
+// Dashboard routes
+router.get('/api/dashboard/stats', dashboardController.getStats);
+router.get(
+  '/api/dashboard/recent-evaluations',
+  dashboardController.getRecentEvaluations
+);
 
 // Partner routes
 router.get('/api/partners', partnerController.getPartners);
