@@ -1,5 +1,5 @@
+import type { LLMModel } from '@shared/db/types';
 import OpenAI from 'openai';
-import type { LLMModel } from '../generated/prisma';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

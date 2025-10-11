@@ -5,8 +5,7 @@ import { productRepository } from '../repositories/product.repository';
 import { llm } from '../lib/llm';
 import { promptService } from './prompt.service';
 import { ObjectId } from 'mongodb';
-import type { LLMModel, EvaluationStatus } from '../generated/prisma';
-import { th } from 'zod/locales';
+import type { LLMModel, EvaluationStatus } from '@shared/db/types';
 
 interface EvaluationFilters {
   objectiveId?: string;

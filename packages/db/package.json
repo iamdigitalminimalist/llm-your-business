@@ -1,0 +1,29 @@
+{
+  "name": "@shared/db",
+  "version": "1.0.0",
+  "module": "index.ts",
+  "main": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./types": "./types.ts",
+    "./api-types": "./api-types.ts"
+  },
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:migrate": "prisma migrate dev",
+    "db:reset": "prisma migrate reset",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.17.1",
+    "prisma": "^6.17.1"
+  }
+}

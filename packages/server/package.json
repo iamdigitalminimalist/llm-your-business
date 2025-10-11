@@ -5,25 +5,20 @@
   "private": true,
   "scripts": {
     "start": "bun run index.ts",
-    "dev": "bun run --watch index.ts",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:seed": "bun run prisma/seed.ts"
+    "dev": "bun run --watch index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/express": "^5.0.3",
-    "prisma": "^6.16.2"
+    "@types/express": "^5.0.3"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
-    "@prisma/client": "^6.16.2",
+    "@shared/db": "workspace:*",
     "dayjs": "^1.11.18",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
-    "mongodb": "^6.20.0",
     "openai": "^5.22.1",
     "zod": "^4.1.11"
   }

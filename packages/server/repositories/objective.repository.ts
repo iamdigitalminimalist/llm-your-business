@@ -1,5 +1,5 @@
-import type { LLMModel } from '../generated/prisma';
-import { prisma } from '../lib/db';
+import type { LLMModel } from '@shared/db/types';
+import { prisma } from '@shared/db';
 
 export const objectiveRepository = {
   getObjectives: async () => {

@@ -1,5 +1,5 @@
+import { connectDatabase, disconnectDatabase, prisma } from '../';
 import { PartnerType, ProductType, LLMModel } from '../generated/prisma';
-import { prisma, connectDatabase, disconnectDatabase } from '../lib/db';
 
 async function main() {
   console.log('🌱 Starting database seeding...');

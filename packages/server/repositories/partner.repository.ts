@@ -1,5 +1,5 @@
 import type { ObjectId } from 'mongodb';
-import { prisma } from '../lib/db';
+import { prisma } from '@shared/db';
 
 export const partnerRepository = {
   getPartners: async () => {

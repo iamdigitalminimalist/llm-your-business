@@ -1,4 +1,4 @@
-import type { Partner, Product } from '../generated/prisma';
+import type { Partner, Product } from '@shared/db/types';
 
 interface EvaluationPromptContext {
   objective: {

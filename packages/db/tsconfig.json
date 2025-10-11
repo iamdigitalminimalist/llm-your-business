@@ -14,14 +14,6 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
-    // Path mapping
-    "baseUrl": ".",
-    "paths": {
-      "@shared/db": ["../db/index.ts"],
-      "@shared/db/types": ["../db/types.ts"],
-      "@shared/db/api-types": ["../db/api-types.ts"]
-    },
-
     // Best practices
     "strict": true,
     "skipLibCheck": true,

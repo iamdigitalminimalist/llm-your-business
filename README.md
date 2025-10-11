@@ -50,8 +50,10 @@ powershell -c "irm bun.sh/install.ps1 | iex"
    Generate Prisma client and push schema to MongoDB:
 
    ```bash
-   cd packages/server
+   # Generate Prisma client
    bun run db:generate
+
+   # Push schema to database
    bun run db:push
    ```
 
@@ -66,6 +68,27 @@ bun run dev
 
 - Server: `http://localhost:3000`
 - Client: `http://localhost:5173`
+
+## 🗄️ Database Commands
+
+The application includes convenient database management commands:
+
+```bash
+# Generate Prisma client (run after schema changes)
+bun run db:generate
+
+# Push schema changes to database
+bun run db:push
+
+# Open Prisma Studio (database GUI)
+bun run db:studio
+
+# Create and apply migrations (for production)
+bun run db:migrate
+
+# Reset database (development only)
+bun run db:reset
+```
 
 ## 🛠 Technology Stack
 

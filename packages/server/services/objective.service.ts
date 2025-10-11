@@ -1,4 +1,4 @@
-import { LLMModel } from '../generated/prisma';
+import { LLMModel } from '@shared/db/types';
 import { objectiveRepository } from '../repositories/objective.repository';
 
 interface CreateObjectiveRequest {

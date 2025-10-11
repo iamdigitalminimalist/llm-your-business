@@ -1,5 +1,5 @@
-import { prisma } from '../lib/db';
-import type { LLMModel, EvaluationStatus } from '../generated/prisma';
+import type { EvaluationStatus, LLMModel } from '@shared/db/types';
+import { prisma } from '@shared/db';
 
 interface CreateEvaluationData {
   llmModel: LLMModel;

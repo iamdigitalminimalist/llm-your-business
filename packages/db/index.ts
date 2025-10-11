@@ -1,9 +1,13 @@
-import { PrismaClient } from '../generated/prisma/index.js';
+import { PrismaClient } from './generated/prisma';
+
+// Environment-aware Prisma client configuration
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 export const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'],
+  log: isDevelopment ? ['query', 'info', 'warn', 'error'] : ['error'],
 });
 
+// Database connection utilities
 export async function connectDatabase() {
   try {
     await prisma.$connect();
@@ -17,3 +21,6 @@ export async function connectDatabase() {
 export async function disconnectDatabase() {
   await prisma.$disconnect();
 }
+
+// Re-export PrismaClient for type usage
+export { PrismaClient };
