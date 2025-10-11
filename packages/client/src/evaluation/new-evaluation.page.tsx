@@ -4,7 +4,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   CreateObjectiveRequestSchema,
+  LLMModelEnum,
   type CreateObjectiveRequest,
+  type LLMModel,
 } from '@shared/db/api-types';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,12 +54,17 @@ import {
   useCreateEvaluationWorkflow,
 } from './evaluation.api';
 
-const AVAILABLE_MODELS = [
-  { id: 'GPT_4O', name: 'GPT-4O' },
-  { id: 'GPT_4O_MINI', name: 'GPT-4O Mini' },
-  { id: 'CLAUDE_3_5_SONNET', name: 'Claude 3.5 Sonnet' },
-  { id: 'GEMINI_PRO', name: 'Gemini Pro' },
-];
+const LLM_MODEL_DISPLAY_NAMES: Record<LLMModel, string> = {
+  GPT_4O: 'GPT-4O',
+  GPT_4O_MINI: 'GPT-4O Mini',
+  CLAUDE_3_5_SONNET: 'Claude 3.5 Sonnet',
+  GEMINI_PRO: 'Gemini Pro',
+};
+
+const availableModels = LLMModelEnum.options.map((modelId) => ({
+  id: modelId,
+  name: LLM_MODEL_DISPLAY_NAMES[modelId],
+}));
 
 export function NewEvaluation() {
   const navigate = useNavigate();
@@ -87,16 +94,16 @@ export function NewEvaluation() {
     if (watchedPartnerId !== selectedPartnerId) {
       setSelectedPartnerId(watchedPartnerId || null);
       if (watchedPartnerId) {
-        form.setValue('productId', ''); // Reset product selection when partner changes
+        form.setValue('productId', '');
       }
     }
   }, [watchedPartnerId, selectedPartnerId, form]);
 
-  const handleModelToggle = (modelId: string) => {
+  const handleModelToggle = (modelId: LLMModel) => {
     const currentModels = form.getValues('llmModels');
-    const newModels = currentModels.includes(modelId as any)
+    const newModels = currentModels.includes(modelId)
       ? currentModels.filter((id) => id !== modelId)
-      : [...currentModels, modelId as any];
+      : [...currentModels, modelId];
 
     form.setValue('llmModels', newModels);
     form.trigger('llmModels');
@@ -116,12 +123,7 @@ export function NewEvaluation() {
     createEvaluationMutation.mutate(requestData, {
       onSuccess: (result) => {
         console.debug('Evaluation created successfully:', result);
-        navigate('/', {
-          state: {
-            message: `Evaluation "${result.objective.title}" created successfully with ${result.evaluations.length} AI model(s)!`,
-            type: 'success',
-          },
-        });
+        navigate('/');
       },
       onError: (error) => {
         console.error('Failed to create evaluation:', error);
@@ -373,10 +375,8 @@ export function NewEvaluation() {
                         Multiple models provide better insights.
                       </FormDescription>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {AVAILABLE_MODELS.map((model) => {
-                          const isSelected = field.value.includes(
-                            model.id as any
-                          );
+                        {availableModels.map((model) => {
+                          const isSelected = field.value.includes(model.id);
                           return (
                             <button
                               key={model.id}
@@ -409,8 +409,8 @@ export function NewEvaluation() {
                             Selected Models ({field.value.length})
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            {field.value.map((modelId: string) => {
-                              const model = AVAILABLE_MODELS.find(
+                            {field.value.map((modelId: LLMModel) => {
+                              const model = availableModels.find(
                                 (m) => m.id === modelId
                               );
                               return (
