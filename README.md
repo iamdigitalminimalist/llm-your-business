@@ -1,15 +1,114 @@
-# llm-your-business
+# LLM Your Business
 
-To install dependencies:
+**Market positioning insights through AI evaluation** - A comprehensive application for evaluating business partner mentions across different LLM models to understand market positioning and brand awareness.
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+This application requires [Bun](https://bun.com) - a fast all-in-one JavaScript runtime.
+
+#### Install Bun
 
 ```bash
-bun install
+# macOS and Linux
+curl -fsSL https://bun.sh/install | bash
+
+# Or using Homebrew (macOS)
+brew install bun
+
+# Windows (using PowerShell)
+powershell -c "irm bun.sh/install.ps1 | iex"
 ```
 
-To run:
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd llm-your-business
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   # Install all dependencies (root, client, and server)
+   bun install
+   ```
+
+3. **Environment Variables**
+
+   **For environment variables and API keys, please contact Or for the required configuration files.**
+
+   You'll need:
+   - MongoDB connection string (cluster API key)
+   - LLM API keys (OpenAI, Anthropic, etc.)
+
+4. **Database Setup**
+
+   Generate Prisma client and push schema to MongoDB:
+
+   ```bash
+   cd packages/server
+   bun run db:generate
+   bun run db:push
+   ```
+
+### Running the Application
+
+#### Development Mode
 
 ```bash
-bun run index.ts
+# Starts both client and server concurrently
+bun run dev
 ```
 
-This project was created using `bun init` in bun v1.2.23. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+- Server: `http://localhost:3000`
+- Client: `http://localhost:5173`
+
+## 🛠 Technology Stack
+
+### Frontend
+
+- **React 18** with TypeScript
+- **Vite** for fast development and building
+- **TailwindCSS** for styling
+- **ShadcnUI** for component library
+- **React Router** for navigation
+- **TanStack Query** for server state management
+- **React Hook Form + Zod** for form handling
+
+### Backend
+
+- **Node.js** with TypeScript
+- **Express.js** for API server
+- **Prisma** for database ORM
+- **MongoDB** for primary database
+- **JWT** for authentication
+- **OpenAI/Anthropic APIs** for LLM integrations
+
+## 📊 Key Features
+
+- **Dashboard**: Overview metrics, recent evaluations, and quick actions
+- **Partner Management**: Comprehensive directory with filtering and search
+- **Evaluation Workflow**: Multi-LLM testing with results analysis
+- **Real-time Updates**: Live data refresh and notifications
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run linting (`bun run lint`)
+5. Commit changes (`git commit -m 'Add amazing feature'`)
+6. Push to branch (`git push origin feature/amazing-feature`)
+7. Submit a pull request
+
+## 📞 Support
+
+For environment variables, setup assistance, or questions, contact **Or**.
+
+## 📄 License
+
+This project is private and proprietary. All rights reserved.
