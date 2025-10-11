@@ -1,12 +1,13 @@
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Header } from '@/components/header';
 import {
-  Building2,
   Target,
   BarChart3,
   TrendingUp,
   Plus,
-  Users,
+  Building2,
   FileText,
   AlertCircle,
   RefreshCw,
@@ -16,6 +17,8 @@ import { useDashboardStats, useRecentEvaluations } from './dashboard.api';
 import { getStatusIcon, getStatusText } from './dashboard.util';
 
 export function Dashboard() {
+  const navigate = useNavigate();
+
   const {
     data: stats,
     isLoading: statsLoading,
@@ -75,61 +78,12 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-stone-50">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-stone-200/50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex justify-between items-center py-8">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl text-left font-semibold text-stone-800 tracking-tight">
-                  LLM Your Business
-                </h1>
-                <p className="text-sm text-stone-500 font-medium mt-0.5">
-                  Market positioning insights through AI evaluation
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Button
-                onClick={handleRefresh}
-                variant="outline"
-                size="sm"
-                disabled={isLoading}
-                className="rounded-xl border-stone-300 hover:bg-stone-200 hover:border-stone-400 text-stone-700 hover:text-stone-800 font-medium transition-colors"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
-                />
-                Refresh
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-xl border-stone-300 hover:bg-stone-200 hover:border-stone-400 text-stone-700 hover:text-stone-800 font-medium transition-colors"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Profile
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-xl border-stone-300 hover:bg-stone-200 hover:border-stone-400 text-stone-700 hover:text-stone-800 font-medium transition-colors"
-              >
-                Settings
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-xl border-stone-300 hover:bg-stone-200 hover:border-stone-400 text-stone-700 hover:text-stone-800 font-medium transition-colors"
-              >
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Header
+        title="LLM Your Business"
+        subtitle="Market positioning insights through AI evaluation"
+        onRefresh={handleRefresh}
+        isRefreshing={isLoading}
+      />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
@@ -226,7 +180,10 @@ export function Dashboard() {
             <Card className="bg-white/60 backdrop-blur-sm border-stone-200/50 rounded-2xl shadow-sm">
               <CardContent className="p-6">
                 <div className="space-y-3">
-                  <Button className="w-full justify-start rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 transition-colors">
+                  <Button
+                    onClick={() => navigate('/evaluation/new')}
+                    className="w-full justify-start rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 transition-colors"
+                  >
                     <Plus className="w-4 h-4 mr-3" />
                     New Evaluation
                   </Button>

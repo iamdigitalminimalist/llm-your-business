@@ -25,7 +25,6 @@ interface ApiResponse<T> {
   message?: string;
 }
 
-// API fetcher functions
 const fetchDashboardStats = async (): Promise<DashboardStats> => {
   const response = await fetch('/api/dashboard/stats');
   if (!response.ok) {
@@ -54,12 +53,10 @@ const fetchRecentEvaluations = async (
   return result.data;
 };
 
-// Custom hooks
 export const useDashboardStats = () => {
   return useQuery({
     queryKey: ['dashboard', 'stats'],
     queryFn: fetchDashboardStats,
-    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 };
 
@@ -67,6 +64,5 @@ export const useRecentEvaluations = (limit = 5) => {
   return useQuery({
     queryKey: ['dashboard', 'recent-evaluations', limit],
     queryFn: () => fetchRecentEvaluations(limit),
-    staleTime: 1 * 60 * 1000, // 1 minute
   });
 };
