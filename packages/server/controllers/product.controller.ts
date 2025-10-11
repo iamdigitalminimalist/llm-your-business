@@ -5,8 +5,24 @@ import { productService } from '../services/product.service';
 export const productController = {
   getProducts: async (req: Request, res: Response) => {
     try {
-      console.info('🔍 Looking for products...');
-      const products = await productService.getProducts();
+      const { partnerId } = req.query;
+      console.info('🔍 Looking for products...', { partnerId });
+
+      let products;
+      if (partnerId) {
+        if (!ObjectId.isValid(partnerId as string)) {
+          return res.status(400).json({
+            error: 'Invalid partner ID format',
+            message: 'Partner ID must be a valid MongoDB ObjectId',
+          });
+        }
+        products = await productService.getProductsByPartner(
+          new ObjectId(partnerId as string)
+        );
+      } else {
+        products = await productService.getProducts();
+      }
+
       console.info(`✅ Found ${products.length} products`);
 
       res.json({

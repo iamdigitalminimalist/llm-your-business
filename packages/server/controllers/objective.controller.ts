@@ -21,4 +21,56 @@ export const objectiveController = {
       });
     }
   },
+
+  createObjective: async (req: Request, res: Response) => {
+    try {
+      const { title, question, partnerId, productId, llmModels } = req.body;
+
+      console.info('🎯 Creating new objective...', {
+        title,
+        partnerId,
+        productId,
+        modelCount: llmModels?.length || 0,
+      });
+
+      // Validate required fields
+      if (!title || !question || !partnerId || !productId || !llmModels) {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message:
+            'title, question, partnerId, productId, and llmModels are required',
+        });
+      }
+
+      const objective = await objectiveService.createObjective({
+        title,
+        question,
+        partnerId,
+        productId,
+        llmModels,
+      });
+
+      console.info(`✅ Objective created successfully:`, {
+        id: objective.id,
+        title: objective.title,
+        partner: objective.partner?.name,
+        product: objective.product?.name,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: objective,
+      });
+    } catch (error) {
+      console.error('Error creating objective:', error);
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+
+      res.status(500).json({
+        error: 'Failed to create objective',
+        message: errorMessage,
+      });
+    }
+  },
 };

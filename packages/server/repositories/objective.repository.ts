@@ -1,3 +1,4 @@
+import type { LLMModel } from '../generated/prisma';
 import { prisma } from '../lib/db';
 
 export const objectiveRepository = {
@@ -31,6 +32,33 @@ export const objectiveRepository = {
         productId: true,
         isActive: true,
         llmModels: true,
+      },
+    });
+  },
+
+  createObjective: async (data: {
+    title: string;
+    question: string;
+    partnerId: string;
+    productId: string;
+    llmModels: LLMModel[];
+  }) => {
+    return prisma.objective.create({
+      data: {
+        title: data.title,
+        question: data.question,
+        partnerId: data.partnerId,
+        productId: data.productId,
+        llmModels: data.llmModels,
+        isActive: true,
+      },
+      include: {
+        partner: {
+          select: { id: true, name: true, publicId: true },
+        },
+        product: {
+          select: { id: true, name: true, publicId: true },
+        },
       },
     });
   },

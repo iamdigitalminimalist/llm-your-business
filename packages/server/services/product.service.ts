@@ -7,6 +7,11 @@ export const productService = {
     return products.filter((product) => product.isActive !== false);
   },
 
+  getProductsByPartner: async (partnerId: ObjectId) => {
+    const products = await productRepository.getProductsByPartner(partnerId);
+    return products.filter((product) => product.isActive !== false);
+  },
+
   getProductById: async (id: ObjectId) => {
     const product = await productRepository.getProductById(id);
 

@@ -33,6 +33,7 @@ router.get('/api/products/:id', productController.getProduct);
 
 // Objective routes
 router.get('/api/objectives', objectiveController.getObjectives);
+router.post('/api/objectives', objectiveController.createObjective);
 
 // Evaluation routes
 router.get('/api/evaluations', evaluationController.getEvaluations);
