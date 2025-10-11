@@ -144,7 +144,7 @@ export const partnerRepository = {
     return prisma.partner.create({
       data: {
         ...data,
-        partnerType: data.partnerType as any, // Cast to Prisma enum
+        partnerType: data.partnerType, // Cast to Prisma enum
         publicId: `partner_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       },
       select: {
@@ -171,7 +171,7 @@ export const partnerRepository = {
   updatePartner: async (id: ObjectId, data: UpdatePartnerRequest) => {
     const updateData = { ...data };
     if (updateData.partnerType) {
-      (updateData as any).partnerType = data.partnerType as any; // Cast to Prisma enum
+      updateData.partnerType = data.partnerType;
     }
 
     return prisma.partner.update({
