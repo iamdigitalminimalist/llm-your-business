@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import {
+  CreateObjectiveRequestSchema,
+  type CreateObjectiveRequest,
+} from '@shared/db/api-types';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,24 +52,6 @@ import {
   useCreateEvaluationWorkflow,
 } from './evaluation.api';
 
-const formSchema = z.object({
-  partnerId: z.string().min(1, 'Please select a partner'),
-  productId: z.string().min(1, 'Please select a product'),
-  title: z
-    .string()
-    .min(1, 'Objective title is required')
-    .min(3, 'Title must be at least 3 characters'),
-  question: z
-    .string()
-    .min(1, 'Objective question is required')
-    .min(10, 'Question must be at least 10 characters'),
-  selectedModels: z
-    .array(z.string())
-    .min(1, 'Select at least one model for evaluation'),
-});
-
-type FormData = z.infer<typeof formSchema>;
-
 const AVAILABLE_MODELS = [
   { id: 'GPT_4O', name: 'GPT-4O' },
   { id: 'GPT_4O_MINI', name: 'GPT-4O Mini' },
@@ -80,14 +65,14 @@ export function NewEvaluation() {
     null
   );
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<CreateObjectiveRequest>({
+    resolver: zodResolver(CreateObjectiveRequestSchema),
     defaultValues: {
       partnerId: '',
       productId: '',
       title: '',
       question: '',
-      selectedModels: [],
+      llmModels: [],
     },
   });
 
@@ -108,22 +93,22 @@ export function NewEvaluation() {
   }, [watchedPartnerId, selectedPartnerId, form]);
 
   const handleModelToggle = (modelId: string) => {
-    const currentModels = form.getValues('selectedModels');
-    const newModels = currentModels.includes(modelId)
+    const currentModels = form.getValues('llmModels');
+    const newModels = currentModels.includes(modelId as any)
       ? currentModels.filter((id) => id !== modelId)
-      : [...currentModels, modelId];
+      : [...currentModels, modelId as any];
 
-    form.setValue('selectedModels', newModels);
-    form.trigger('selectedModels');
+    form.setValue('llmModels', newModels);
+    form.trigger('llmModels');
   };
 
-  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (data: CreateObjectiveRequest) => {
     const requestData = {
       title: data.title,
       question: data.question,
       partnerId: data.partnerId,
       productId: data.productId,
-      llmModels: data.selectedModels,
+      llmModels: data.llmModels,
     };
 
     console.debug('Creating evaluation with data:', requestData);
@@ -380,16 +365,18 @@ export function NewEvaluation() {
               <CardContent>
                 <FormField
                   control={form.control}
-                  name="selectedModels"
+                  name="llmModels"
                   render={({ field }) => (
                     <FormItem>
-                      <FormDescription className="text-sm text-stone-600 mb-6">
+                      <FormDescription className="text-sm text-left text-stone-600 mb-6">
                         Choose which AI models to use for this evaluation.
                         Multiple models provide better insights.
                       </FormDescription>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {AVAILABLE_MODELS.map((model) => {
-                          const isSelected = field.value.includes(model.id);
+                          const isSelected = field.value.includes(
+                            model.id as any
+                          );
                           return (
                             <button
                               key={model.id}

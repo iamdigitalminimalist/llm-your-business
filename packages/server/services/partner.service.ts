@@ -1,15 +1,29 @@
 import type { ObjectId } from 'mongodb';
 import { partnerRepository } from '../repositories/partner.repository';
+import type {
+  PartnerFilters,
+  CreatePartnerRequest,
+  UpdatePartnerRequest,
+} from '@shared/db/api-types';
 
 export const partnerService = {
-  getPartners: async () => {
-    const partners = await partnerRepository.getPartners();
+  getPartners: async (
+    filters?: PartnerFilters,
+    pagination?: { skip: number; limit: number }
+  ) => {
+    return partnerRepository.getPartners(filters, pagination);
+  },
 
-    return partners.filter((partner) => partner.isActive !== false);
+  getPartnersCount: async (filters?: PartnerFilters) => {
+    return partnerRepository.getPartnersCount(filters);
   },
 
   getPartnerById: async (id: ObjectId) => {
-    const partner = await partnerRepository.getPartnerById(id);
+    return partnerRepository.getPartnerById(id);
+  },
+
+  getPartnerByIdWithRelations: async (id: ObjectId) => {
+    const partner = await partnerRepository.getPartnerByIdWithRelations(id);
 
     if (!partner) {
       return null;
@@ -21,5 +35,22 @@ export const partnerService = {
       evaluationCount: partner.evaluations?.length || 0,
       hasActiveProducts: partner.products?.some((p) => p.isActive) || false,
     };
+  },
+
+  createPartner: async (data: CreatePartnerRequest) => {
+    return partnerRepository.createPartner(data);
+  },
+
+  updatePartner: async (id: ObjectId, data: UpdatePartnerRequest) => {
+    try {
+      return await partnerRepository.updatePartner(id, data);
+    } catch (error) {
+      // Handle case where partner doesn't exist
+      return null;
+    }
+  },
+
+  deletePartner: async (id: ObjectId) => {
+    return partnerRepository.deletePartner(id);
   },
 };

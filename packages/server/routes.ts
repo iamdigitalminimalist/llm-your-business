@@ -26,6 +26,9 @@ router.get(
 // Partner routes
 router.get('/api/partners', partnerController.getPartners);
 router.get('/api/partners/:id', partnerController.getPartner);
+router.post('/api/partners', partnerController.createPartner);
+router.put('/api/partners/:id', partnerController.updatePartner);
+router.delete('/api/partners/:id', partnerController.deletePartner);
 
 // Product routes
 router.get('/api/products', productController.getProducts);
