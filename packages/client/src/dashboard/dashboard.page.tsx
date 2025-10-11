@@ -188,11 +188,12 @@ export function Dashboard() {
                     New Evaluation
                   </Button>
                   <Button
+                    onClick={() => navigate('/partners')}
                     variant="outline"
                     className="w-full justify-start rounded-xl border-stone-300 hover:bg-stone-200 hover:border-stone-400 text-stone-700 hover:text-stone-800 font-medium py-3 transition-colors"
                   >
                     <Building2 className="w-4 h-4 mr-3" />
-                    Add Partner
+                    View Partners
                   </Button>
                   <Button
                     variant="outline"
