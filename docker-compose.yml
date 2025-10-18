@@ -123,8 +123,8 @@ services:
   # Client (React/Vite)
   client:
     build:
-      context: .
-      dockerfile: ./services/client/Dockerfile
+      context: ./services/client
+      dockerfile: Dockerfile
     container_name: client
     ports:
       - '3000:3000'
@@ -140,8 +140,8 @@ services:
   # Client API (Node.js API)
   client-api:
     build:
-      context: .
-      dockerfile: ./services/client-api/Dockerfile
+      context: ./services/client-api
+      dockerfile: Dockerfile
     container_name: client-api
     ports:
       - '4000:4000'
