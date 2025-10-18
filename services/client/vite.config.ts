@@ -11,10 +11,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target:
-          process.env.NODE_ENV === 'development' && process.env.DOCKER
-            ? 'http://client-api:4000'
-            : 'http://localhost:4000',
+        target: 'http://client-api:4000',
         changeOrigin: true,
       },
     },

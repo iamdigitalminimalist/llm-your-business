@@ -3,7 +3,7 @@
   "module": "index.ts",
   "scripts": {
     "dev": "concurrently --names \"CLIENT-API,CLIENT\" --prefix-colors \"blue,green\" \"bun run dev:client-api\" \"bun run dev:client\"",
-    "docker": "docker-compose up --build",
+    "docker": "docker compose up --build",
     "dev:client-api": "cd services/client-api && bun run dev",
     "dev:client": "cd services/client && bun run dev",
     "format": "prettier --write .",
