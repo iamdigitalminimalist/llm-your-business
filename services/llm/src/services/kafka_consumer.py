@@ -78,32 +78,39 @@ class KafkaConsumerService:
                 logger.error("Error stopping Kafka consumer", error=str(e))
     
     async def _consume_loop(self):
-        """Main consumption loop."""
+        """Main consumption loop with controlled restart."""
         logger.info("Starting message consumption loop")
         
-        try:
-            async for message in self.consumer:
-                if not self._running:
+        while self._running:
+            try:
+                async for message in self.consumer:
+                    if not self._running:
+                        break
+                    
+                    try:
+                        await self._process_message(message)
+                    except Exception as e:
+                        logger.error(
+                            "Error processing message",
+                            error=str(e),
+                            topic=message.topic,
+                            partition=message.partition,
+                            offset=message.offset
+                        )
+                        self._stats["messages_failed"] += 1
+                
+            except Exception as e:
+                logger.error("Error in consumption loop", error=str(e))
+                if self._running:
+                    # Try to restart after a delay
+                    logger.info("Restarting consumption loop after error")
+                    await asyncio.sleep(5)
+                else:
+                    # If not running, break out of the while loop
                     break
-                
-                try:
-                    await self._process_message(message)
-                except Exception as e:
-                    logger.error(
-                        "Error processing message",
-                        error=str(e),
-                        topic=message.topic,
-                        partition=message.partition,
-                        offset=message.offset
-                    )
-                    self._stats["messages_failed"] += 1
-                
-        except Exception as e:
-            logger.error("Error in consumption loop", error=str(e))
-            if self._running:
-                # Try to restart after a delay
-                await asyncio.sleep(5)
-                asyncio.create_task(self._consume_loop())
+            else:
+                # If the async for loop exited normally, break out
+                break
     
     async def _process_message(self, message):
         """Process a single Kafka message."""

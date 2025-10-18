@@ -5,6 +5,27 @@ from typing import Any, Dict
 import structlog
 
 
+# ANSI Color Constants for better maintainability
+class Colors:
+    """ANSI color codes for terminal output."""
+    CYAN = "\033[36m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    RED = "\033[31m"
+    MAGENTA = "\033[35m"
+    RESET = "\033[0m"
+
+
+# Log level color mapping
+LOG_LEVEL_COLORS: Dict[str, str] = {
+    "debug": Colors.CYAN,
+    "info": Colors.GREEN,
+    "warning": Colors.YELLOW,
+    "error": Colors.RED,
+    "critical": Colors.MAGENTA,
+}
+
+
 def setup_logging(level: str = "INFO", json_logs: bool = False) -> None:
     numeric_level = getattr(logging, level.upper(), logging.INFO)
     
@@ -20,13 +41,7 @@ def setup_logging(level: str = "INFO", json_logs: bool = False) -> None:
         processors.extend([
             structlog.dev.ConsoleRenderer(
                 colors=True,
-                level_styles={
-                    "debug": "\033[36m",     # Cyan
-                    "info": "\033[32m",      # Green  
-                    "warning": "\033[33m",   # Yellow
-                    "error": "\033[31m",     # Red
-                    "critical": "\033[35m",  # Magenta
-                },
+                level_styles=LOG_LEVEL_COLORS,
                 pad_level=4  # Reduce padding for level names
             ),
         ])
