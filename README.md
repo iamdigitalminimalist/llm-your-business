@@ -1,8 +1,69 @@
 # LLM Your Business
 
-**Market positioning insights through AI evaluation** - A comprehensive application for evaluating business partner mentions across different LLM models to understand market positioning and brand awareness.
+**AI-Powered Business Objective Processing** - A modern microservices architecture for processing business objectives using Large Language Models, built with Python FastAPI, Node.js, React, and Kafka.
 
-## 🚀 Quick Start
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   React Client  │    │   Node.js API   │    │  Python LLM     │
+│   (Frontend)    │◄───┤   (Server)      │◄───┤  Service        │
+│   Port: 3000    │    │   Port: 5000    │    │  Port: 8000     │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                       │
+                       ┌─────────────────┐            │
+                       │   MongoDB       │◄───────────┘
+                       │   (Database)    │
+                       │   Atlas/Local   │
+                       └─────────────────┘
+                                │
+                       ┌─────────────────┐
+                       │     Kafka       │◄───────────────────┐
+                       │  (Messaging)    │                    │
+                       │   Port: 9092    │                    │
+                       └─────────────────┘                    │
+                                │                             │
+                       ┌─────────────────┐                    │
+                       │   Kafka UI      │                    │
+                       │  (Monitoring)   │                    │
+                       │   Port: 8080    │                    │
+                       └─────────────────┘                    │
+                                                              │
+                       Event-driven processing ──────────────┘
+```
+
+## �️ Development
+
+### LLM Service (Python)
+
+```bash
+cd services/llm
+
+# Quick setup with uv (recommended)
+./setup.sh
+
+# Manual development run
+source .venv/bin/activate
+python -m src.main
+```
+
+### Client (React)
+
+````bash
+cd services/client
+npm install
+npm run dev
+```ClintAPI
+
+### Server (cli.nt-apis)
+
+```bash
+cd services/client-api
+npm install
+npm run dev
+````
+
+## �🚀 Quick Start
 
 ### Prerequisites
 

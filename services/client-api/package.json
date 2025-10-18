@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "client-api",
   "module": "index.ts",
   "type": "module",
   "private": true,
