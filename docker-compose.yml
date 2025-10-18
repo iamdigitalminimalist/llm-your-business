@@ -123,8 +123,8 @@ services:
   # Client (React/Vite)
   client:
     build:
-      context: ./services/client
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/client/Dockerfile
     container_name: client
     ports:
       - '3000:3000'
@@ -133,25 +133,28 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-    profiles:
-      - full-stack # Only start when running full stack
+      - DOCKER=true
+    networks:
+      - llm-network
 
   # Client API (Node.js API)
   client-api:
     build:
-      context: ./services/client-api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./services/client-api/Dockerfile
     container_name: client-api
     ports:
-      - '5000:5000'
+      - '4000:4000'
     environment:
       - NODE_ENV=development
       - DATABASE_URL=${DATABASE_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PORT=4000
     volumes:
       - ./services/client-api:/app
       - /app/node_modules
-    profiles:
-      - full-stack # Only start when running full stack
+    networks:
+      - llm-network
 
 volumes:
   mongodb_data:
