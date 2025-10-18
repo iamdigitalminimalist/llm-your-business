@@ -146,7 +146,7 @@ cp .env.example .env
 docker-compose logs llm-service
 
 # Or test manually if needed
-docker-compose exec llm-service python -c "from src.services.database import DatabaseService; import asyncio; asyncio.run(DatabaseService().ping())"
+docker-compose exec llm-service python -c "from src.services.database_service import DatabaseService; import asyncio; asyncio.run(DatabaseService().ping())"
 ```
 
 ### 5. Run Service
