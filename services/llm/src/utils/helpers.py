@@ -1,7 +1,7 @@
 import asyncio
 import json
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Callable, Awaitable
 from datetime import datetime
 import logging
 
@@ -27,7 +27,7 @@ def safe_json_dumps(data: Any, default: Any = serialize_datetime) -> str:
 
 
 async def retry_async(
-    func,
+    func: Callable[[], Awaitable[Any]],
     max_retries: int = 3,
     delay: float = 1.0,
     backoff: float = 2.0,

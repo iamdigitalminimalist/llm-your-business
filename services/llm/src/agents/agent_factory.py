@@ -14,6 +14,16 @@ from .competitor_agent import CompetitorAnalysisAgent
 from .pros_cons_agent import ProsConsAgent
 
 
+OPENAI_MODELS = {
+    "gpt-3.5-turbo",
+    "gpt-3.5-turbo-16k", 
+    "gpt-4",
+    "gpt-4-turbo",
+    "gpt-4o",
+    "gpt-4o-mini",
+}
+
+
 class AgentFactory:
     """Factory for creating LangChain agents based on objective type."""
     
@@ -40,18 +50,21 @@ class AgentFactory:
         return agent_class(llm, self.settings)
     
     def _create_llm(self, model: str):
-        """Create LLM instance based on model name."""
+        """Create LLM instance - currently supports OpenAI models only."""
+        # Check if it's a supported OpenAI model
+        if model in OPENAI_MODELS or model.startswith(("gpt-", "chatgpt-")):
+            return self._create_openai_llm()
         
-        if model.startswith("gpt") or model.startswith("chat_gpt"):
-            if not self.settings.openai_api_key:
-                raise ValueError("OpenAI API key not configured")
-            
-            return ChatOpenAI(
-                model=self.settings.openai_model,
-                api_key=self.settings.openai_api_key,
-                temperature=self.settings.openai_temperature,
-                max_tokens=self.settings.openai_max_tokens
-            )
+        raise ValueError(f"Unsupported model: {model}. Supported models: {sorted(OPENAI_MODELS)}")
+    
+    def _create_openai_llm(self):
+        """Create OpenAI LLM instance."""
+        if not self.settings.openai_api_key:
+            raise ValueError("OpenAI API key not configured")
         
-        else:
-            raise ValueError(f"Unsupported model: {model}. Only OpenAI models are supported.")
+        return ChatOpenAI(
+            model=self.settings.openai_model,
+            api_key=self.settings.openai_api_key,
+            temperature=self.settings.openai_temperature,
+            max_tokens=self.settings.openai_max_tokens
+        )

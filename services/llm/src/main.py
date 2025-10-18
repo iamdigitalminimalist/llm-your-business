@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI):
         yield
     except Exception as e:
         logger.error("Application error during runtime", error=str(e))
-        sys.exit(1)
+        raise
     finally:
         logger.info("Shutting down services...")
         
