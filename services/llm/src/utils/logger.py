@@ -15,10 +15,8 @@ class Colors:
     MAGENTA = "\033[35m"
     RESET = "\033[0m"
 
-
-# Log level color mapping
 LOG_LEVEL_COLORS: Dict[str, str] = {
-    "debug": Colors.CYAN,
+    "debug": Colors.CYAN, 
     "info": Colors.GREEN,
     "warning": Colors.YELLOW,
     "error": Colors.RED,
