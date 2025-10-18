@@ -10,7 +10,7 @@ TEST_EVENT = {
     "question_id": "40227177-1bf6-45c7-be48-240962d6db29",
     "persona": {},
     "language": "EN",
-    "model": "chat_gpt5"
+    "model": "gpt-4"
 }
 
 async def send_test_event():
