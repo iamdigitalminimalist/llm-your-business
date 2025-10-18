@@ -2,16 +2,16 @@
   "name": "llm-your-business",
   "module": "index.ts",
   "scripts": {
-    "dev": "concurrently --names \"SERVER,CLIENT\" --prefix-colors \"blue,green\" \"bun run dev:server\" \"bun run dev:client\"",
-    "dev:server": "cd packages/server && bun run dev",
-    "dev:client": "cd packages/client && bun run dev",
+    "dev": "concurrently --names \"CLIENT-API,CLIENT\" --prefix-colors \"blue,green\" \"bun run dev:client-api\" \"bun run dev:client\"",
+    "dev:client-api": "cd services/client-api && bun run dev",
+    "dev:client": "cd services/client && bun run dev",
     "format": "prettier --write .",
     "prepare": "husky",
-    "db:generate": "cd packages/db && bun run db:generate",
-    "db:push": "cd packages/db && bun run db:push",
-    "db:studio": "cd packages/db && bun run db:studio",
-    "db:migrate": "cd packages/db && bun run db:migrate",
-    "db:reset": "cd packages/db && bun run db:reset"
+    "db:generate": "cd services/db && bun run db:generate",
+    "db:push": "cd services/db && bun run db:push",
+    "db:studio": "cd services/db && bun run db:studio",
+    "db:migrate": "cd services/db && bun run db:migrate",
+    "db:reset": "cd services/db && bun run db:reset"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -26,6 +26,6 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "services/*"
   ]
 }
