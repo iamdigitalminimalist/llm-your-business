@@ -74,16 +74,6 @@ class Settings(BaseSettings):
         description="Processing timeout in seconds"
     )
     
-    # Model Configuration
-    default_temperature: float = Field(
-        default=0.7,
-        description="Default temperature for LLM models"
-    )
-    max_tokens: int = Field(
-        default=2000,
-        description="Maximum tokens for LLM responses"
-    )
-    
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",

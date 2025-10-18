@@ -20,8 +20,10 @@ fi
 PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2 | cut -d'.' -f1-2)
 echo "🐍 Detected Python version: $PYTHON_VERSION"
 
-# Simple version check for Python 3.10+
-if [[ "$PYTHON_VERSION" < "3.10" ]]; then
+# Proper version check for Python 3.10+
+PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f1)
+PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d'.' -f2)
+if [ "$PYTHON_MAJOR" -lt 3 ] || { [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 10 ]; }; then
     echo "❌ Python $PYTHON_VERSION detected. LangChain 1.0.0 requires Python 3.10+"
     echo "💡 Installing Python 3.11 with uv..."
     uv venv --python 3.11
