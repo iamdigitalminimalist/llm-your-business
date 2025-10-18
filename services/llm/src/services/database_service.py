@@ -30,9 +30,6 @@ class DatabaseService:
             
             if objective_doc:
                 objective_doc["_id"] = str(objective_doc["_id"])
-                logger.info("Objective retrieved successfully", 
-                          objective_id=objective_id, 
-                          title=objective_doc.get("title", "Unknown"))
                 return objective_doc
             else:
                 logger.warning("Objective not found", objective_id=objective_id)

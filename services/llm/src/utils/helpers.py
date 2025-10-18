@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from typing import Any, Dict, Optional
 from datetime import datetime
 import logging
@@ -54,8 +55,6 @@ def extract_error_message(error: Exception) -> str:
 
 
 def validate_required_env_vars(*var_names: str) -> Dict[str, str]:
-    import os
-    
     missing_vars = []
     env_vars = {}
     
