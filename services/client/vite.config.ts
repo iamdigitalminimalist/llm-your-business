@@ -7,8 +7,13 @@ import path from 'path';
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
+    host: '0.0.0.0',
+    port: 3000,
     proxy: {
-      '/api': 'http://localhost:3000',
+      '/api': {
+        target: 'http://client-api:4000',
+        changeOrigin: true,
+      },
     },
   },
   resolve: {
