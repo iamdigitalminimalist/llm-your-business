@@ -32,7 +32,7 @@
                        Event-driven processing ──────────────┘
 ```
 
-## �️ Development
+## Development
 
 ### LLM Service (Python)
 
@@ -49,19 +49,19 @@ python -m src.main
 
 ### Client (React)
 
-````bash
+```bash
 cd services/client
 npm install
 npm run dev
-```ClintAPI
+```
 
-### Server (cli.nt-apis)
+### Client API
 
 ```bash
 cd services/client-api
 npm install
 npm run dev
-````
+```
 
 ## �🚀 Quick Start
 

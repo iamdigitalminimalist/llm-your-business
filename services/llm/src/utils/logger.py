@@ -11,7 +11,6 @@ def setup_logging(level: str = "INFO", json_logs: bool = False) -> None:
     processors = [
         structlog.stdlib.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.add_log_level,
         structlog.processors.StackInfoRenderer(),
     ]
     
