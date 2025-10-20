@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ObjectiveExecutionQuestion",
+  "type": "object",
+  "required": ["meta", "data"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "created_at",
+        "producer",
+        "run_attempt",
+        "manifest_id",
+        "execution_id",
+        "objective_id",
+        "question_id",
+        "question_type",
+        "persona",
+        "language",
+        "model"
+      ],
+      "properties": {
+        "schema_version": { "type": "integer", "minimum": 1, "default": 1 },
+        "created_at": { "type": "integer", "minimum": 0, "description": "Epoch millis (entity creation)" },
+        "producer": { "type": "string" },
+        "run_attempt": { "type": "integer", "minimum": 1, "default": 1 },
+        "manifest_id": { "type": "string", "format": "uuid" },
+        "execution_id": { "type": "string", "format": "uuid" },
+        "objective_id": { "type": "string", "format": "uuid" },
+        "question_id": { "type": "string", "format": "uuid" },
+        "question_type": { "$ref": "common/question_type.v1.json#/definitions/QuestionType" },
+        "persona": {
+          "$ref": "common/persona.v1.json#/definitions/Persona"
+        },
+        "language": { "$ref": "common/language.v1.json#/definitions/Language" },
+        "model": { "$ref": "common/model.v1.json#/definitions/Model" }
+      },
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object",
+      "required": ["prompt"],
+      "properties": {
+        "prompt": { "type": "string", "minLength": 1 },
+        "input_tokens_budget": { "type": ["integer", "null"], "minimum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

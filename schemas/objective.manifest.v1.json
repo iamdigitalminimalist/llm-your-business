@@ -1,0 +1,73 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "ObjectiveManifest",
+    "description": "Event containing all questions to be executed for a specific run of an objective.",
+    "type": "object",
+    "required": ["meta", "data"],
+    "properties": {
+        "meta": {
+            "type": "object",
+            "required": [
+                "schema_version",
+                "created_at",
+                "producer",
+                "manifest_id",
+                "execution_id",
+                "objective_id"
+            ],
+            "properties": {
+                "schema_version": { "type": "integer", "minimum": 1, "default": 1 },
+                "created_at": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Epoch millis when the manifest was created"
+                },
+                "producer": { "type": "string", "description": "Service emitting this manifest" },
+                "manifest_id": { "type": "string", "format": "uuid" },
+                "execution_id": { "type": "string", "format": "uuid" },
+                "objective_id": { "type": "string", "format": "uuid" }
+            },
+            "additionalProperties": false
+        },
+        "data": {
+            "type": "object",
+            "required": ["questions"],
+            "properties": {
+                "questions": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "question_id",
+                            "prompt",
+                            "persona",
+                            "language",
+                            "model"
+                        ],
+                        "properties": {
+                            "question_id": { "type": "string", "format": "uuid" },
+                            "persona": {
+                                "$ref": "common/persona.v1.json#/definitions/Persona"
+                            },
+                            "language": {
+                                "$ref": "common/language.v1.json#/definitions/Language"
+                            },
+                            "model": {
+                                "$ref": "common/model.v1.json#/definitions/Model"
+                            },
+                            "input_tokens_budget": {
+                                "type": ["integer", "null"],
+                                "minimum": 1
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "description": "All question configurations for this execution run"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

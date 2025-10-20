@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Persona",
+  "definitions": {
+    "Persona": {
+      "type": "object",
+      "required": ["type", "attributes"],
+      "properties": {
+        "type": { "type": "string" },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "Persona": {
+      "type": "object",
+      "required": ["type", "attributes"],
+      "properties": {
+        "type": { "type": "string" },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$ref": "#/definitions/Persona"
+}

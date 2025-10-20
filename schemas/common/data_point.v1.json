@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DataPointTypes",
+  "definitions": {
+    "Top5DataPoint": {
+      "type": "object",
+      "description": "Rank→label map for top 5 results, keys are ranks as strings",
+      "patternProperties": { "^[0-9]+$": { "type": "string" } },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 5
+    },
+    "Top10DataPoint": {
+      "type": "object",
+      "description": "Rank→label map for top 10 results, keys are ranks as strings",
+      "patternProperties": { "^[0-9]+$": { "type": "string" } },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 10
+    }
+  },
+  "$defs": {
+    "Top5DataPoint": {
+      "type": "object",
+      "description": "Rank→label map for top 5 results, keys are ranks as strings",
+      "patternProperties": { "^[0-9]+$": { "type": "string" } },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 5
+    },
+    "Top10DataPoint": {
+      "type": "object",
+      "description": "Rank→label map for top 10 results, keys are ranks as strings",
+      "patternProperties": { "^[0-9]+$": { "type": "string" } },
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 10
+    }
+  }
+}

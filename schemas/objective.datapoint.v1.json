@@ -1,0 +1,89 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "ObjectiveDatapoint",
+    "type": "object",
+    "required": ["meta", "data"],
+    "properties": {
+        "meta": {
+            "type": "object",
+            "required": [
+                "schema_version",
+                "created_at",
+                "producer",
+                "run_attempt",
+                "manifest_id",
+                "execution_id",
+                "question_id",
+                "question_type",
+                "persona",
+                "language",
+                "model"
+            ],
+            "properties": {
+                "schema_version": { "type": "integer", "minimum": 1, "default": 1 },
+                "created_at": { "type": "integer", "minimum": 0, "description": "Epoch millis (entity creation)" },
+                "producer": { "type": "string" },
+                "run_attempt": { "type": "integer", "minimum": 1, "default": 1 },
+                "manifest_id": { "type": "string", "format": "uuid" },
+                "execution_id": { "type": "string", "format": "uuid" },
+                "question_id": { "type": "string", "format": "uuid" },
+                "question_type": { "$ref": "common/question_type.v1.json#/definitions/QuestionType" },
+                "persona": {
+                    "$ref": "common/persona.v1.json#/definitions/Persona"
+                },
+                "language": { "$ref": "common/language.v1.json#/definitions/Language" },
+                "model": { "$ref": "common/model.v1.json#/definitions/Model" }
+            },
+            "additionalProperties": false
+        },
+        "data": {
+            "type": "object",
+            "required": ["extraction_spec_id", "data", "confidence", "normalizer_version"],
+            "properties": {
+                "extraction_spec_id": { "type": "string", "format": "uuid" },
+                "data": {
+                    "type": "object",
+                    "description": "Typed data payload for the question_type"
+                },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "normalizer_version": { "type": "string" }
+            },
+            "additionalProperties": false
+        }
+    },
+    "oneOf": [
+        {
+            "properties": {
+                "meta": {
+                    "properties": {
+                        "question_type": { "const": "top_5" }
+                    },
+                    "required": ["question_type"]
+                },
+                "data": {
+                    "properties": {
+                        "data": { "$ref": "common/data_point.v1.json#/definitions/Top5DataPoint" }
+                    },
+                    "required": ["data"]
+                }
+            }
+        },
+        {
+            "properties": {
+                "meta": {
+                    "properties": {
+                        "question_type": { "const": "top_10" }
+                    },
+                    "required": ["question_type"]
+                },
+                "data": {
+                    "properties": {
+                        "data": { "$ref": "common/data_point.v1.json#/definitions/Top10DataPoint" }
+                    },
+                    "required": ["data"]
+                }
+            }
+        }
+    ],
+    "additionalProperties": false
+}

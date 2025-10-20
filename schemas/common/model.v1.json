@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Model",
+  "definitions": {
+    "Model": {
+      "type": "string",
+      "enum": ["CHAT_GPT5", "CLAUDE_3_5", "GEMINI_2", "LLAMA_4"]
+    }
+  },
+  "$defs": {
+    "Model": {
+      "type": "string",
+      "enum": ["CHAT_GPT5", "CLAUDE_3_5", "GEMINI_2", "LLAMA_4"]
+    }
+  },
+  "$ref": "#/definitions/Model"
+}

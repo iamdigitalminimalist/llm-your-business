@@ -1,0 +1,66 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "ObjectiveExecutionAnswer",
+    "type": "object",
+    "required": ["meta", "data"],
+    "properties": {
+        "meta": {
+            "type": "object",
+            "required": [
+                "schema_version",
+                "created_at",
+                "producer",
+                "run_attempt",
+                "manifest_id",
+                "execution_id",
+                "objective_id",
+                "question_id",
+                "persona",
+                "language",
+                "model"
+            ],
+            "properties": {
+                "schema_version": { "type": "integer", "minimum": 1, "default": 1 },
+                "created_at": { "type": "integer", "minimum": 0, "description": "Epoch millis (entity creation)" },
+                "producer": { "type": "string" },
+                "run_attempt": { "type": "integer", "minimum": 1, "default": 1 },
+                "manifest_id": { "type": "string", "format": "uuid" },
+                "execution_id": { "type": "string", "format": "uuid" },
+                "objective_id": { "type": "string", "format": "uuid" },
+                "question_id": { "type": "string", "format": "uuid" },
+                "persona": {
+                    "$ref": "common/persona.v1.json#/definitions/Persona"
+                },
+                "language": { "$ref": "common/language.v1.json#/definitions/Language" },
+                "model": { "$ref": "common/model.v1.json#/definitions/Model" }
+            },
+            "additionalProperties": false
+        },
+        "data": {
+            "type": "object",
+            "required": ["answer_text", "finish_reason", "execution_metadata"],
+            "properties": {
+                "answer_text": { "type": "string" },
+                "finish_reason": {
+                    "type": "string",
+                    "enum": ["STOP", "LENGTH", "CONTENT_FILTER", "ERROR"]
+                },
+                "execution_metadata": {
+                    "type": "object",
+                    "required": ["latency_ms", "input_tokens", "output_tokens", "http_status"],
+                    "properties": {
+                        "latency_ms": { "type": "integer", "minimum": 0 },
+                        "input_tokens": { "type": "integer", "minimum": 0 },
+                        "output_tokens": { "type": "integer", "minimum": 0 },
+                        "http_status": { "type": "integer", "minimum": 100, "maximum": 599 },
+                        "retries": { "type": "integer", "minimum": 0, "default": 0 },
+                        "cache_hit": { "type": "boolean", "default": false }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

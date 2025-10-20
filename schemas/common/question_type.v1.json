@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QuestionType",
+  "definitions": {
+    "QuestionType": {
+      "type": "string",
+      "enum": ["top_5", "top_10"]
+    }
+  },
+  "$defs": {
+    "QuestionType": {
+      "type": "string",
+      "enum": ["top_5", "top_10"]
+    }
+  },
+  "$ref": "#/definitions/QuestionType"
+}
