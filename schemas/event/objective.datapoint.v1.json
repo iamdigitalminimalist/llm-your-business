@@ -27,12 +27,10 @@
                 "manifest_id": { "type": "string", "format": "uuid" },
                 "execution_id": { "type": "string", "format": "uuid" },
                 "question_id": { "type": "string", "format": "uuid" },
-                "question_type": { "$ref": "common/question_type.v1.json#/definitions/QuestionType" },
-                "persona": {
-                    "$ref": "common/persona.v1.json#/definitions/Persona"
-                },
-                "language": { "$ref": "common/language.v1.json#/definitions/Language" },
-                "model": { "$ref": "common/model.v1.json#/definitions/Model" }
+                "question_type": { "$ref": "../common/question_type.v1.json#/definitions/QuestionType" },
+                "persona": { "type": "string" },
+                "language": { "$ref": "../common/language.v1.json#/definitions/Language" },
+                "model": { "$ref": "../common/model.v1.json#/definitions/Model" }
             },
             "additionalProperties": false
         },
@@ -62,7 +60,7 @@
                 },
                 "data": {
                     "properties": {
-                        "data": { "$ref": "common/data_point.v1.json#/definitions/Top5DataPoint" }
+                        "data": { "$ref": "../common/data_point.v1.json#/definitions/Top5DataPoint" }
                     },
                     "required": ["data"]
                 }
@@ -78,7 +76,7 @@
                 },
                 "data": {
                     "properties": {
-                        "data": { "$ref": "common/data_point.v1.json#/definitions/Top10DataPoint" }
+                        "data": { "$ref": "../common/data_point.v1.json#/definitions/Top10DataPoint" }
                     },
                     "required": ["data"]
                 }

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ObjectiveRun",
+  "type": "object",
+  "required": ["timestamp", "manifest_id"],
+  "properties": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "manifest_id": { "type": "string", "format": "uuid" }
+  },
+  "additionalProperties": false
+}
+

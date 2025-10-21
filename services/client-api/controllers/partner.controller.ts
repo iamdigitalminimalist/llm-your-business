@@ -1,6 +1,7 @@
 import { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { partnerService } from '../services/partner.service';
+import { toCamel, toSnake } from '../lib/case';
 import {
   PartnerFiltersSchema,
   IdParamsSchema,
@@ -27,7 +28,7 @@ export const partnerController = {
       // Validate query parameters
       const filtersValidation = safeValidateRequest(
         PartnerFiltersSchema,
-        req.query
+        toCamel(req.query as any)
       );
       if (!filtersValidation.success) {
         return res.status(400).json(filtersValidation.error);
@@ -49,15 +50,17 @@ export const partnerController = {
         partners.map(transformPrismaToApi);
 
       res.json(
-        createApiResponse.paginated(
-          transformedPartners,
-          {
-            page,
-            limit,
-            total,
-            totalPages: Math.ceil(total / limit),
-          },
-          `Retrieved ${partners.length} partners successfully`
+        toSnake(
+          createApiResponse.paginated(
+            transformedPartners,
+            {
+              page,
+              limit,
+              total,
+              totalPages: Math.ceil(total / limit),
+            },
+            `Retrieved ${partners.length} partners successfully`
+          )
         )
       );
     } catch (error) {
@@ -65,10 +68,12 @@ export const partnerController = {
       res
         .status(500)
         .json(
-          createApiResponse.error(
-            'Internal Server Error',
-            'Failed to fetch partners',
-            500
+          toSnake(
+            createApiResponse.error(
+              'Internal Server Error',
+              'Failed to fetch partners',
+              500
+            )
           )
         );
     }
@@ -78,7 +83,10 @@ export const partnerController = {
     try {
       console.info('🔍 Looking for partner with ID:', req.params.id);
 
-      const paramsValidation = safeValidateRequest(IdParamsSchema, req.params);
+      const paramsValidation = safeValidateRequest(
+        IdParamsSchema,
+        toCamel(req.params as any)
+      );
       if (!paramsValidation.success) {
         return res.status(400).json(paramsValidation.error);
       }
@@ -104,9 +112,11 @@ export const partnerController = {
       const transformedPartner: PartnerResponse = transformPrismaToApi(partner);
 
       res.json(
-        createApiResponse.success(
-          transformedPartner,
-          'Partner retrieved successfully'
+        toSnake(
+          createApiResponse.success(
+            transformedPartner,
+            'Partner retrieved successfully'
+          )
         )
       );
     } catch (error) {
@@ -114,10 +124,12 @@ export const partnerController = {
       res
         .status(500)
         .json(
-          createApiResponse.error(
-            'Internal Server Error',
-            'Failed to fetch partner data',
-            500
+          toSnake(
+            createApiResponse.error(
+              'Internal Server Error',
+              'Failed to fetch partner data',
+              500
+            )
           )
         );
     }
@@ -129,7 +141,7 @@ export const partnerController = {
 
       const bodyValidation = safeValidateRequest(
         CreatePartnerRequestSchema,
-        req.body
+        toCamel(req.body as any)
       );
       if (!bodyValidation.success) {
         return res.status(400).json(bodyValidation.error);
@@ -146,9 +158,11 @@ export const partnerController = {
       res
         .status(201)
         .json(
-          createApiResponse.success(
-            transformedPartner,
-            'Partner created successfully'
+          toSnake(
+            createApiResponse.success(
+              transformedPartner,
+              'Partner created successfully'
+            )
           )
         );
     } catch (error) {
@@ -156,10 +170,12 @@ export const partnerController = {
       res
         .status(500)
         .json(
-          createApiResponse.error(
-            'Internal Server Error',
-            'Failed to create partner',
-            500
+          toSnake(
+            createApiResponse.error(
+              'Internal Server Error',
+              'Failed to create partner',
+              500
+            )
           )
         );
     }
@@ -170,7 +186,10 @@ export const partnerController = {
       console.info('✏️ Updating partner with ID:', req.params.id);
 
       // Validate route parameters
-      const paramsValidation = safeValidateRequest(IdParamsSchema, req.params);
+      const paramsValidation = safeValidateRequest(
+        IdParamsSchema,
+        toCamel(req.params as any)
+      );
       if (!paramsValidation.success) {
         return res.status(400).json(paramsValidation.error);
       }
@@ -178,7 +197,7 @@ export const partnerController = {
       // Validate request body
       const bodyValidation = safeValidateRequest(
         UpdatePartnerRequestSchema,
-        req.body
+        toCamel(req.body as any)
       );
       if (!bodyValidation.success) {
         return res.status(400).json(bodyValidation.error);
@@ -210,9 +229,11 @@ export const partnerController = {
         transformPrismaToApi(updatedPartner);
 
       res.json(
-        createApiResponse.success(
-          transformedPartner,
-          'Partner updated successfully'
+        toSnake(
+          createApiResponse.success(
+            transformedPartner,
+            'Partner updated successfully'
+          )
         )
       );
     } catch (error) {
@@ -220,10 +241,12 @@ export const partnerController = {
       res
         .status(500)
         .json(
-          createApiResponse.error(
-            'Internal Server Error',
-            'Failed to update partner',
-            500
+          toSnake(
+            createApiResponse.error(
+              'Internal Server Error',
+              'Failed to update partner',
+              500
+            )
           )
         );
     }
@@ -234,7 +257,10 @@ export const partnerController = {
       console.info('🗑️ Deleting partner with ID:', req.params.id);
 
       // Validate route parameters
-      const paramsValidation = safeValidateRequest(IdParamsSchema, req.params);
+      const paramsValidation = safeValidateRequest(
+        IdParamsSchema,
+        toCamel(req.params as any)
+      );
       if (!paramsValidation.success) {
         return res.status(400).json(paramsValidation.error);
       }
@@ -257,9 +283,11 @@ export const partnerController = {
       console.info('✅ Partner deleted successfully');
 
       res.json(
-        createApiResponse.success(
-          { deleted: true },
-          'Partner deleted successfully'
+        toSnake(
+          createApiResponse.success(
+            { deleted: true },
+            'Partner deleted successfully'
+          )
         )
       );
     } catch (error) {
@@ -267,10 +295,12 @@ export const partnerController = {
       res
         .status(500)
         .json(
-          createApiResponse.error(
-            'Internal Server Error',
-            'Failed to delete partner',
-            500
+          toSnake(
+            createApiResponse.error(
+              'Internal Server Error',
+              'Failed to delete partner',
+              500
+            )
           )
         );
     }

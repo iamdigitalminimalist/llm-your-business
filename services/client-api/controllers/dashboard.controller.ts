@@ -1,5 +1,6 @@
 import { type Request, type Response } from 'express';
 import { dashboardService } from '../services/dashboard.service';
+import { toSnake } from '../lib/case';
 
 export const dashboardController = {
   getStats: async (req: Request, res: Response) => {
@@ -10,17 +11,21 @@ export const dashboardController = {
 
       console.info('✅ Dashboard stats retrieved successfully');
 
-      res.json({
-        success: true,
-        data: stats,
-      });
+      res.json(
+        toSnake({
+          success: true,
+          data: stats,
+        })
+      );
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
-      res.status(500).json({
-        error: 'Failed to fetch dashboard statistics',
-        message:
-          error instanceof Error ? error.message : 'Unknown error occurred',
-      });
+      res.status(500).json(
+        toSnake({
+          error: 'Failed to fetch dashboard statistics',
+          message:
+            error instanceof Error ? error.message : 'Unknown error occurred',
+        })
+      );
     }
   },
 
@@ -37,18 +42,22 @@ export const dashboardController = {
         `✅ Retrieved ${recentEvaluations.length} recent evaluations`
       );
 
-      res.json({
-        success: true,
-        count: recentEvaluations.length,
-        data: recentEvaluations,
-      });
+      res.json(
+        toSnake({
+          success: true,
+          count: recentEvaluations.length,
+          data: recentEvaluations,
+        })
+      );
     } catch (error) {
       console.error('Error fetching recent evaluations:', error);
-      res.status(500).json({
-        error: 'Failed to fetch recent evaluations',
-        message:
-          error instanceof Error ? error.message : 'Unknown error occurred',
-      });
+      res.status(500).json(
+        toSnake({
+          error: 'Failed to fetch recent evaluations',
+          message:
+            error instanceof Error ? error.message : 'Unknown error occurred',
+        })
+      );
     }
   },
 };

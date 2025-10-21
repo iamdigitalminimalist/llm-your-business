@@ -1,11 +1,18 @@
 import { type Request, type Response } from 'express';
 import { ObjectId } from 'mongodb';
 import { evaluationService } from '../services/evaluation.service';
+import { toCamel, toSnake } from '../lib/case';
 
 export const evaluationController = {
   getEvaluations: async (req: Request, res: Response) => {
     try {
-      const { partnerId, productId, objectiveId } = req.query;
+      const { partnerId, productId, objectiveId } = toCamel(
+        req.query as any
+      ) as {
+        partnerId?: string;
+        productId?: string;
+        objectiveId?: string;
+      };
       console.info('🔍 Looking for evaluations...', {
         partnerId,
         productId,
@@ -21,11 +28,13 @@ export const evaluationController = {
       const evaluations = await evaluationService.getEvaluations(filters);
       console.info(`✅ Found ${evaluations.length} evaluations`);
 
-      res.json({
-        success: true,
-        count: evaluations.length,
-        data: evaluations,
-      });
+      res.json(
+        toSnake({
+          success: true,
+          count: evaluations.length,
+          data: evaluations,
+        })
+      );
     } catch (error) {
       console.error('Error fetching evaluations:', error);
       res.status(500).json({
@@ -37,20 +46,26 @@ export const evaluationController = {
 
   createEvaluation: async (req: Request, res: Response) => {
     try {
-      const { objectiveId } = req.body;
+      const { objectiveId } = toCamel(req.body as any) as {
+        objectiveId?: string;
+      };
 
       if (!objectiveId) {
-        return res.status(400).json({
-          error: 'Invalid request',
-          message: 'objectiveId is required',
-        });
+        return res.status(400).json(
+          toSnake({
+            error: 'Invalid request',
+            message: 'objectiveId is required',
+          })
+        );
       }
 
       if (!ObjectId.isValid(objectiveId)) {
-        return res.status(400).json({
-          error: 'Invalid ID format',
-          message: 'objectiveId must be a valid MongoDB ObjectId',
-        });
+        return res.status(400).json(
+          toSnake({
+            error: 'Invalid ID format',
+            message: 'objectiveId must be a valid MongoDB ObjectId',
+          })
+        );
       }
 
       console.info('🔍 Creating evaluations for objective...', { objectiveId });
@@ -68,11 +83,13 @@ export const evaluationController = {
         })),
       });
 
-      res.status(201).json({
-        success: true,
-        count: newEvaluations.length,
-        data: newEvaluations,
-      });
+      res.status(201).json(
+        toSnake({
+          success: true,
+          count: newEvaluations.length,
+          data: newEvaluations,
+        })
+      );
     } catch (error) {
       console.error('Error creating evaluations:', error);
 

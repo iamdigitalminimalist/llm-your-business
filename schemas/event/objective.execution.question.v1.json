@@ -18,6 +18,7 @@
         "question_type",
         "persona",
         "language",
+        "location",
         "model"
       ],
       "properties": {
@@ -29,12 +30,11 @@
         "execution_id": { "type": "string", "format": "uuid" },
         "objective_id": { "type": "string", "format": "uuid" },
         "question_id": { "type": "string", "format": "uuid" },
-        "question_type": { "$ref": "common/question_type.v1.json#/definitions/QuestionType" },
-        "persona": {
-          "$ref": "common/persona.v1.json#/definitions/Persona"
-        },
-        "language": { "$ref": "common/language.v1.json#/definitions/Language" },
-        "model": { "$ref": "common/model.v1.json#/definitions/Model" }
+        "question_type": { "$ref": "../common/question_type.v1.json#/definitions/QuestionType" },
+        "persona": { "type": "string" },
+        "language": { "$ref": "../common/language.v1.json#/definitions/Language" },
+        "location": { "type": "string" },
+        "model": { "$ref": "../common/model.v1.json#/definitions/Model" }
       },
       "additionalProperties": false
     },
@@ -42,8 +42,7 @@
       "type": "object",
       "required": ["prompt"],
       "properties": {
-        "prompt": { "type": "string", "minLength": 1 },
-        "input_tokens_budget": { "type": ["integer", "null"], "minimum": 1 }
+        "prompt": { "type": "string", "minLength": 1 }
       },
       "additionalProperties": false
     }

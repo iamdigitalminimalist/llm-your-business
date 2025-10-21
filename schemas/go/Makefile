@@ -1,18 +1,23 @@
-COMMON_SCHEMAS := ../common/language.v1.json \
-                  ../common/model.v1.json \
-                  ../common/persona.v1.json \
-                  ../common/question_type.v1.json \
-                  ../common/data_point.v1.json
+EVENT_SCHEMAS := $(wildcard ../event/*.v1.json)
+MODEL_SCHEMAS := $(wildcard ../model/*.v1.json)
 
-# Include all event schemas in parent directory (e.g., *.v1.json)
-EVENT_SCHEMAS := $(wildcard ../*.v1.json)
+EVENTS_OUT := ./events/types_gen.go
+MODEL_OUT := ./model/types_gen.go
 
-SCHEMAS := $(COMMON_SCHEMAS) $(EVENT_SCHEMAS)
+.PHONY: gen clean regen gen-events gen-models
 
-PKG := events
-OUT := ./events/types_gen.go
-
-.PHONY: gen
-gen:
-	go-jsonschema -p $(PKG) -o $(OUT) $(SCHEMAS)
+gen: gen-events gen-models
 	go fmt ./...
+
+gen-events:
+	mkdir -p ./events
+	go-jsonschema -p events -o $(EVENTS_OUT) $(EVENT_SCHEMAS)
+
+gen-models:
+	mkdir -p ./model
+	go-jsonschema -p model -o $(MODEL_OUT) $(MODEL_SCHEMAS)
+
+clean:
+	rm -rf ./events ./model
+
+regen: clean gen

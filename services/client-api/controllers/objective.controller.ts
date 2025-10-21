@@ -1,5 +1,6 @@
 import { type Request, type Response } from 'express';
 import { objectiveService } from '../services/objective.service';
+import { toCamel, toSnake } from '../lib/case';
 
 export const objectiveController = {
   getObjectives: async (req: Request, res: Response) => {
@@ -8,11 +9,13 @@ export const objectiveController = {
       const objectives = await objectiveService.getObjectives();
       console.info(`✅ Found ${objectives.length} objectives`);
 
-      res.json({
-        success: true,
-        count: objectives.length,
-        data: objectives,
-      });
+      res.json(
+        toSnake({
+          success: true,
+          count: objectives.length,
+          data: objectives,
+        })
+      );
     } catch (error) {
       console.error('Error fetching objectives:', error);
       res.status(500).json({
@@ -24,7 +27,8 @@ export const objectiveController = {
 
   createObjective: async (req: Request, res: Response) => {
     try {
-      const { title, question, partnerId, productId, llmModels } = req.body;
+      const body = toCamel(req.body as any);
+      const { title, question, partnerId, productId, llmModels } = body;
 
       console.info('🎯 Creating new objective...', {
         title,
@@ -57,10 +61,12 @@ export const objectiveController = {
         product: objective.product?.name,
       });
 
-      res.status(201).json({
-        success: true,
-        data: objective,
-      });
+      res.status(201).json(
+        toSnake({
+          success: true,
+          data: objective,
+        })
+      );
     } catch (error) {
       console.error('Error creating objective:', error);
 

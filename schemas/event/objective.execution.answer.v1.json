@@ -28,11 +28,9 @@
                 "execution_id": { "type": "string", "format": "uuid" },
                 "objective_id": { "type": "string", "format": "uuid" },
                 "question_id": { "type": "string", "format": "uuid" },
-                "persona": {
-                    "$ref": "common/persona.v1.json#/definitions/Persona"
-                },
-                "language": { "$ref": "common/language.v1.json#/definitions/Language" },
-                "model": { "$ref": "common/model.v1.json#/definitions/Model" }
+                "persona": { "type": "string" },
+                "language": { "$ref": "../common/language.v1.json#/definitions/Language" },
+                "model": { "$ref": "../common/model.v1.json#/definitions/Model" }
             },
             "additionalProperties": false
         },

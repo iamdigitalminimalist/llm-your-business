@@ -38,28 +38,9 @@
                     "minItems": 1,
                     "items": {
                         "type": "object",
-                        "required": [
-                            "question_id",
-                            "prompt",
-                            "persona",
-                            "language",
-                            "model"
-                        ],
+                        "required": ["question_id"],
                         "properties": {
-                            "question_id": { "type": "string", "format": "uuid" },
-                            "persona": {
-                                "$ref": "common/persona.v1.json#/definitions/Persona"
-                            },
-                            "language": {
-                                "$ref": "common/language.v1.json#/definitions/Language"
-                            },
-                            "model": {
-                                "$ref": "common/model.v1.json#/definitions/Model"
-                            },
-                            "input_tokens_budget": {
-                                "type": ["integer", "null"],
-                                "minimum": 1
-                            }
+                            "question_id": { "type": "string", "format": "uuid" }
                         },
                         "additionalProperties": false
                     },
