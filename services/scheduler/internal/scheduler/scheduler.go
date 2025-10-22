@@ -5,7 +5,7 @@ import (
     "log"
     "time"
 
-    model "llm-your-business/schemas/model"
+    model "llm-your-business/services/go/models"
     "llm-your-business/services/scheduler/internal/config"
     "llm-your-business/services/scheduler/internal/db"
     "llm-your-business/services/scheduler/internal/kafka"

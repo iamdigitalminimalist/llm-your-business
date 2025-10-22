@@ -11,7 +11,7 @@ import (
     "go.mongodb.org/mongo-driver/mongo"
     "go.mongodb.org/mongo-driver/mongo/options"
 
-    model "llm-your-business/schemas/model"
+    model "llm-your-business/services/go/models"
 )
 
 type Client struct {

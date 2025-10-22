@@ -1,6 +1,6 @@
 module llm-your-business/services/scheduler
 
-go 1.21
+go 1.23
 
 require (
     github.com/segmentio/kafka-go v0.4.46
@@ -8,4 +8,3 @@ require (
 )
 
 replace llm-your-business/schemas => ../../schemas/go
-

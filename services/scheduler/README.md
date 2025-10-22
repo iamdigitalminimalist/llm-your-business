@@ -2,7 +2,7 @@ Scheduler Service (Go)
 
 Overview
 - Consumes Kafka topics and dispatches to handlers per event type.
-- Uses generated types from `schemas/go/events` and `schemas/go/model` modules.
+- Uses generated types from `schemas/go/events` and Go data models from `services/go/models`.
 - Handlers currently do not write to DB; they are TODO stubs.
 
 Layout
@@ -13,9 +13,9 @@ Layout
 - `internal/kafka` – Kafka consumer and producer connectors.
 - `internal/scheduler` – scheduler service struct (holds Kafka producer + DB client).
 - `internal/topics` – Kafka topic names as constants.
-- Generated types via schemas (no local structs)
-  - Event schemas: `schemas/event/*.v1.json` → one file: `schemas/go/events/types_gen.go` (package `llm-your-business/schemas/events`).
-  - Model schemas: `schemas/model/*.v1.json` → one file: `schemas/go/model/types_gen.go` (package `llm-your-business/schemas/model`).
+- Types
+  - Events: generated from JSON Schemas → `schemas/go/events` (import `llm-your-business/schemas/events`).
+  - Models: hand-written Go structs → `services/go/models` (import `llm-your-business/services/go/models`).
 
 Environment
 - `KAFKA_BOOTSTRAP_SERVERS` (required) – CSV, e.g. `localhost:9092`.
@@ -33,8 +33,9 @@ Environment
 - `LOG_LEVEL` (optional) – default `info`.
 
 Workspace
-- Root `go.work` includes both modules so local imports work:
+- Root `go.work` includes these modules so local imports work:
   - `./schemas/go`
+  - `./services/go/models`
   - `./services/scheduler`
 
 Run locally

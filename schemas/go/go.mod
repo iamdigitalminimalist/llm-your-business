@@ -1,4 +1,3 @@
 module llm-your-business/schemas
 
-go 1.21
-
+go 1.23

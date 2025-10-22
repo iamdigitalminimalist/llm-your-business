@@ -10,7 +10,7 @@ import (
     "time"
 
     "llm-your-business/schemas/events"
-    model "llm-your-business/schemas/model"
+    model "llm-your-business/services/go/models"
 )
 
 // executeObjective gathers questions for the objective, builds a manifest event,
@@ -70,6 +70,7 @@ func (s *Service) executeObjective(ctx context.Context, id string, obj model.Obj
         if err != nil {
             return "", fmt.Errorf("derive question type: %w", err)
         }
+        loc := deriveLocation(obj, q)
         qe := events.ObjectiveExecutionQuestionV1Json{
             Meta: events.ObjectiveExecutionQuestionV1JsonMeta{
                 SchemaVersion: 1,
@@ -81,8 +82,9 @@ func (s *Service) executeObjective(ctx context.Context, id string, obj model.Obj
                 ObjectiveId:   id,
                 QuestionId:    q.QuestionId,
                 QuestionType:  qtype,
-                Persona:       events.Persona(q.Persona),
+                Persona:       q.Persona.Type,
                 Language:      events.Language(q.Language),
+                Location:      loc,
                 Model:         mdl,
             },
             Data: events.ObjectiveExecutionQuestionV1JsonData{
@@ -159,6 +161,46 @@ func deriveQuestionType(obj model.ObjectiveV1Json) (events.QuestionType, error) 
         }
     }
     return "", fmt.Errorf("objective_type not set")
+}
+
+// deriveLocation attempts to find a location from the objective's targets
+// that matches the question's persona and language. Returns empty string if none.
+func deriveLocation(obj model.ObjectiveV1Json, q model.QuestionV1Json) string {
+    // With the new model, targets is a single object with slice fields.
+    // We match if the question persona and language are present; then pick the first location.
+    if len(obj.Targets.Location) == 0 && len(obj.Targets.Persona) == 0 && len(obj.Targets.Language) == 0 {
+        return ""
+    }
+    qLang := string(q.Language)
+    qPersona := q.Persona.Type
+
+    containsStr := func(list []string, s string) bool {
+        for _, v := range list {
+            if v == s { return true }
+        }
+        return false
+    }
+    containsLang := func(list []model.Language, s string) bool {
+        for _, v := range list {
+            if string(v) == s { return true }
+        }
+        return false
+    }
+
+    // Prefer both persona and language present
+    if (len(obj.Targets.Persona) == 0 || containsStr(obj.Targets.Persona, qPersona)) &&
+       (len(obj.Targets.Language) == 0 || containsLang(obj.Targets.Language, qLang)) {
+        if len(obj.Targets.Location) > 0 { return obj.Targets.Location[0] }
+    }
+
+    // Fallback: language only
+    if len(obj.Targets.Language) == 0 || containsLang(obj.Targets.Language, qLang) {
+        if len(obj.Targets.Location) > 0 { return obj.Targets.Location[0] }
+    }
+
+    // Last resort: any configured location
+    if len(obj.Targets.Location) > 0 { return obj.Targets.Location[0] }
+    return ""
 }
 
 // uuidV4 generates a random RFC4122 version 4 UUID as a string.

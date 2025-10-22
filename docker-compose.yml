@@ -156,6 +156,29 @@ services:
     networks:
       - llm-network
 
+  # Scheduler (Go)
+  scheduler:
+    build:
+      context: .
+      dockerfile: services/scheduler/Dockerfile
+    container_name: scheduler
+    restart: unless-stopped
+    environment:
+      - APP_ENV=development
+      - LOG_LEVEL=info
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_CONSUMER_GROUP=scheduler-group
+      - KAFKA_CLIENT_ID=scheduler
+      - DB_ENABLED=false
+      # When enabling DB, also set:
+      # - MONGODB_URI=mongodb://mongodb:27017
+      # - MONGODB_DATABASE=llm_business
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - llm-network
+
 volumes:
   mongodb_data:
 
