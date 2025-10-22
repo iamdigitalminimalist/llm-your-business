@@ -8,184 +8,222 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums
 enum PartnerType {
-  RESTAURANT
-  TECH
-  RETAIL
-  SERVICE
-  HEALTHCARE
-  EDUCATION
+  MARKETING_AGENCY
+  CONSULTING_SERVICE
+  TECH_COMPANY
   OTHER
 }
 
-enum MarketingSegment {
-  LOCAL
-  NATIONAL
-  INTERNATIONAL
-  B2B
-  B2C
+enum ProductType {
+  WEBSITE_BUILDER
+  EMAIL_MARKETING
+  CRM_SOFTWARE
+  ECOMMERCE_PLATFORM
+  ANALYTICS_TOOL
+  OTHER
 }
 
-enum ProductType {
-  PHYSICAL_PRODUCT
-  SERVICE_LOCATION
-  DIGITAL_SERVICE
-  EXPERIENCE
+enum ObjectiveType {
+  TOP_5_RECOMMENDATIONS
+  TOP_10_RECOMMENDATIONS
+  COMPETITOR_ANALYSIS
+  PROS_AND_CONS
+  MARKET_POSITION
+  PRICING_ANALYSIS
 }
 
 enum LLMModel {
   GPT_4O
   GPT_4O_MINI
-  CLAUDE_3_5_SONNET
-  GEMINI_PRO
+  GPT_3_5_TURBO
 }
 
-enum EvaluationStatus {
-  PENDING // Evaluation request submitted but not processed
-  IN_PROGRESS // Currently being processed by LLM
-  COMPLETED // Successfully completed
-  FAILED // Failed to complete (error occurred)
-  CANCELLED // Manually cancelled
-  TIMEOUT // Request timed out
+enum ExecutionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }
 
+// 1. Partner - Organizations using the platform
 model Partner {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  publicId String @unique @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  // Basic Information
-  name        String      @unique
+  name        String
   description String?
   partnerType PartnerType
 
-  // Contact & Location
-  website      String?
-  addressLine1 String?
-  addressLine2 String?
-  city         String?
-  state        String?
-  country      String
-  postalCode   String?
-
-  // Market Information
+  website  String?
+  country  String  @default("US")
   industry String?
 
-  // Status
-  isActive Boolean @default(true)
-
-  // Timestamps
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  products    Product[]
-  objectives  Objective[]
-  evaluations Evaluation[]
+  products   Product[]
+  executions Execution[]
 
   @@map("partners")
 }
 
+// 2. Product - Products/services owned by partners
 model Product {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  publicId String @unique @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
   name        String
   description String?
   productType ProductType
 
-  // Pricing (flexible for different types)
-  price      Float? // Base price, starting price, or null for location-based pricing
-  priceRange String? // "€50-150", "Starting from €99", etc.
-  currency   String  @default("EUR")
-
-  // Location
-  city    String?
-  country String?
-
-  // Status
   isActive Boolean @default(true)
 
-  // Relations
-  partnerId   String       @db.ObjectId
-  partner     Partner      @relation(fields: [partnerId], references: [id])
-  objectives  Objective[]
-  evaluations Evaluation[]
+  partnerId String  @db.ObjectId
+  partner   Partner @relation(fields: [partnerId], references: [id])
 
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  executions Execution[]
 
   @@map("products")
 }
 
+// 3. Objective - Static objective definitions (seeded data)
 model Objective {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  publicId String @unique @default(cuid())
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  // Basic Information
-  title     String
-  question  String // Final question ready to be sent to LLM
-  llmModels LLMModel[] // Array of LLM models to use for evaluation
+  type        ObjectiveType @unique
+  title       String // "Top 5 Recommendations"
+  description String // Comprehensive description for LLM context
 
-  // Required Relations
-  partnerId String  @db.ObjectId // Required: specific to a partner
-  partner   Partner @relation(fields: [partnerId], references: [id])
+  // Static configuration
+  expectedAnswerFormat String // "Provide a numbered list of 5 items with brief explanations"
+  models               LLMModel[] // Default models to use
 
-  productId String  @db.ObjectId // Required: specific to a product
-  product   Product @relation(fields: [productId], references: [id])
-
-  // Configuration
-  isActive Boolean @default(true)
-
-  // Relations
-  evaluations Evaluation[]
-
-  // Timestamps
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  questions  Question[]
+  executions Execution[]
 
   @@map("objectives")
 }
 
-model Evaluation {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  publicId String @unique @default(cuid())
+// 4. Question - Template questions for objectives
+model Question {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  // LLM Details
-  llmModel LLMModel // Which LLM model was used
-  prompt   String // The actual prompt sent to LLM
-  response String // LLM response
+  template     String // "What are the top 5 [product_type] for [persona] in [location]?"
+  placeholders String[] // ["product_type", "persona", "location"]
 
-  // Basic Results
-  score        Float? // Overall score (0-10)
-  mentionFound Boolean @default(false) // Was partner/product mentioned?
-
-  // Structured Analysis Results
-  ranking                  Int? // Position in ranking (e.g., 3 for 3rd place)
-  totalCompetitors         Int? // Total number of competitors mentioned
-  recommendationLikelihood Int? // Percentage likelihood (0-100) of recommendation
-  competitiveStrengths     String[] // Array of key strengths
-  competitiveWeaknesses    String[] // Array of weaknesses/areas for improvement
-  marketPosition           String? // Description of market position
-  keyDifferentiators       String[] // What sets them apart from competitors
-  evaluation               String? // The detailed evaluation text
-
-  // Status
-  status EvaluationStatus @default(PENDING)
-
-  // Relations
-  objectiveId String    @db.ObjectId // Required: which objective was evaluated
+  objectiveId String    @db.ObjectId
   objective   Objective @relation(fields: [objectiveId], references: [id])
 
-  partnerId String?  @db.ObjectId // Optional: if evaluation is partner-specific
-  partner   Partner? @relation(fields: [partnerId], references: [id])
+  answers Answer[]
 
-  productId String?  @db.ObjectId // Optional: if evaluation is product-specific
-  product   Product? @relation(fields: [productId], references: [id])
+  @@map("questions")
+}
 
-  // Timestamps
+// 5. Target - Configuration for question template filling
+model Target {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  persona         String // "The Creative Freelancer"
+  occupation      String[] // ["Designer", "Photographer", "Writer"]
+  technicalSkills String // "Low-to-medium"
+  goals           String[] // ["Showcase portfolio", "attract clients"]
+  motivations     String[] // ["Build professional presence", "Increase income"]
+
+  location String @default("United States")
+  language String @default("English")
+
+  // Additional context
+  useCase String? // "creating an online store"
+  budget  String? // "under $100/month"
+
+  executionId String    @db.ObjectId
+  execution   Execution @relation(fields: [executionId], references: [id])
+
+  @@map("targets")
+}
+
+// 6. Execution - Links everything together for a specific run
+model Execution {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // What we're analyzing
+  partnerId String  @db.ObjectId
+  partner   Partner @relation(fields: [partnerId], references: [id])
+
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id])
+
+  objectiveId String    @db.ObjectId
+  objective   Objective @relation(fields: [objectiveId], references: [id])
+
+  // Status tracking
+  status      ExecutionStatus @default(PENDING)
+  startedAt   DateTime        @default(now())
+  completedAt DateTime?
+
+  // Relations
+  targets  Target[]
+  answers  Answer[]
+  insights Insight[]
+
+  @@map("executions")
+}
+
+// 7. Answer - LLM responses for resolved questions
+model Answer {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  originalQuestion String // Resolved question sent to LLM
+  answerText       String // Full LLM response
+  model            LLMModel
+
+  // Metadata
+  tokensUsed     Int?
+  processingTime Int? // milliseconds
+
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  @@map("evaluations")
+  // Relations
+  questionId String   @db.ObjectId
+  question   Question @relation(fields: [questionId], references: [id])
+
+  executionId String    @db.ObjectId
+  execution   Execution @relation(fields: [executionId], references: [id])
+
+  insights Insight[]
+
+  @@map("answers")
+}
+
+// 8. Insight - Parsed numeric results from answers
+model Insight {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  // Core metrics
+  mentioned  Boolean @default(false) // Was our product/partner mentioned?
+  ranking    Int? // Position in rankings (1, 2, 3...)
+  totalItems Int? // Total items in the list (for context)
+
+  // Extracted data
+  mentionContext String? // How it was mentioned
+  strengths      String[] // Positive points mentioned
+  weaknesses     String[] // Areas for improvement
+
+  // Confidence scoring
+  confidence Float? // 0-1 confidence in extraction
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  answerId String @db.ObjectId
+  answer   Answer @relation(fields: [answerId], references: [id])
+
+  executionId String    @db.ObjectId
+  execution   Execution @relation(fields: [executionId], references: [id])
+
+  @@map("insights")
 }
