@@ -179,6 +179,24 @@ services:
     networks:
       - llm-network
 
+  # Suggestions (Go)
+  suggestions:
+    build:
+      context: .
+      dockerfile: services/suggestions/Dockerfile
+    container_name: suggestions
+    restart: unless-stopped
+    environment:
+      - PORT=8085
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      # Optional: set custom base URL for compatible providers
+      # - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+    ports:
+      - '8085:8085'
+    networks:
+      - llm-network
+
 volumes:
   mongodb_data:
 

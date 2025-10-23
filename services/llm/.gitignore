@@ -256,6 +256,10 @@ data/
 *.db
 *.sqlite
 
+# Go local build caches
+.gocache
+.gopath
+
 # AI/ML model files
 *.pkl
 *.pickle

@@ -27,6 +27,10 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .cache
 *.tsbuildinfo
 
+# Go local build caches
+.gocache
+.gopath
+
 # IntelliJ based IDEs
 .idea
 

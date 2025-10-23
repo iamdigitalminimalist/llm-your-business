@@ -38,3 +38,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 schemas/go/events
 schemas/go/model
 schemas/go/models
+
+# Go local build caches
+.gocache
+.gopath
