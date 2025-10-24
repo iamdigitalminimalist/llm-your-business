@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { $Enums } from './types';
 
 export const ObjectIdSchema = z
   .string()
@@ -34,11 +33,21 @@ export const ApiErrorSchema = z.object({
   statusCode: z.number().int().optional(),
 });
 
-export const PartnerTypeEnum = z.enum($Enums.PartnerType);
-export const ProductTypeEnum = z.enum($Enums.ProductType);
-export const ObjectiveTypeEnum = z.enum($Enums.ObjectiveType);
-export const LLMModelEnum = z.enum($Enums.LLMModel);
-export const ExecutionStatusEnum = z.enum($Enums.ExecutionStatus);
+export const PartnerTypeEnum = z.enum([
+  'TECHNOLOGY_PROVIDER',
+  'MARKETING_AGENCY',
+  'CONSULTANCY',
+  'RESELLER',
+  'OTHER',
+]);
+export const ProductTypeEnum = z.enum(['DIGITAL', 'PHYSICAL', 'SERVICE']);
+export const ObjectiveTypeEnum = z.enum(['MARKETING', 'SALES', 'PRODUCT']);
+export const LLMModelEnum = z.enum(['GPT-3', 'GPT-4']);
+export const ExecutionStatusEnum = z.enum([
+  'PENDING',
+  'IN_PROGRESS',
+  'COMPLETED',
+]);
 
 export const BaseDocumentSchema = z.object({
   id: z.string(),

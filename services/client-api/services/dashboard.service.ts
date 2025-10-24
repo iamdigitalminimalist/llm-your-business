@@ -83,15 +83,13 @@ export const dashboardService = {
 
     const executions = await executionRepository.getExecutions();
 
-    // For now, return a simplified version since executions have a different structure
-    // This would need to be properly implemented based on the new execution/insight flow
     const recentEvaluations: RecentEvaluation[] = executions
       .slice(0, limit)
       .map((execution: ExecutionWithRelations) => ({
         id: execution.id,
-        partnerName: 'Partner', // Would need to include partner relation
-        productName: 'Product', // Would need to include product relation
-        objectiveTitle: 'Objective', // Would need to include objective relation
+        partnerName: execution.partner?.name ?? '',
+        productName: execution.product?.name ?? '',
+        objectiveTitle: execution.objective?.title ?? '',
         modelCount: 0,
         totalModels: 1,
         avgScore: null,

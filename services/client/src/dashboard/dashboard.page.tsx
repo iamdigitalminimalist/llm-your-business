@@ -181,8 +181,16 @@ export function Dashboard() {
               <CardContent className="p-6">
                 <div className="space-y-3">
                   <Button
+                    onClick={() => navigate('/studio')}
+                    className="w-full justify-start rounded-xl bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-medium py-3 transition-colors shadow-lg"
+                  >
+                    <Plus className="w-4 h-4 mr-3" />
+                    Objective Studio
+                  </Button>
+                  <Button
                     onClick={() => navigate('/evaluation/new')}
-                    className="w-full justify-start rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-medium py-3 transition-colors"
+                    variant="outline"
+                    className="w-full justify-start rounded-xl border-orange-300 hover:bg-orange-50 hover:border-orange-400 text-orange-700 hover:text-orange-800 font-medium py-3 transition-colors"
                   >
                     <Plus className="w-4 h-4 mr-3" />
                     New Evaluation
