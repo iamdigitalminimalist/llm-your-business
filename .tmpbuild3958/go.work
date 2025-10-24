@@ -1,0 +1,8 @@
+go 1.23
+
+use (
+    ./schemas/go
+    ./services/go/models
+    ./services/scheduler
+    ./services/suggestions
+)

@@ -13,25 +13,22 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends make ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Ensure workspace mode picks up the root go.work
-ENV GOWORK=/workspace/go.work
-
 # Install go-jsonschema tool and provide a hyphenated alias used by Makefile
 RUN go install github.com/atombender/go-jsonschema@v0.20.0 \
     && ln -s "$(go env GOPATH)/bin/gojsonschema" /usr/local/bin/go-jsonschema
 
-# Bring in the workspace and sources needed for build
-COPY go.work ./go.work
-COPY go.work.sum ./go.work.sum
+# Bring in only the modules needed for this build
 COPY schemas ./schemas
+COPY services/go/models ./services/go/models
 COPY services/scheduler ./services/scheduler
 
 # Generate schema types for the Go module under schemas/go
 RUN make -C schemas/go gen
 
-# Build the scheduler binary (static)
+# Build the scheduler binary (static). Build from the module dir using -C so we
+# don't depend on a workspace at the repository root.
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
-    go build -o /out/scheduler ./services/scheduler/cmd/scheduler
+    go -C ./services/scheduler build -o /out/scheduler ./cmd/scheduler
 
 # Runtime stage: minimal image with CA certs
 FROM gcr.io/distroless/base-debian12

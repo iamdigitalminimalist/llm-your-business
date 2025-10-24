@@ -7,53 +7,50 @@ import (
 	"time"
 
 	models "llm-your-business/services/go/models"
+	"llm-your-business/services/suggestions/api"
 	"llm-your-business/services/suggestions/internal/chatgpt"
 	"llm-your-business/services/suggestions/internal/requests"
 )
 
 type Options struct {
-    ChatGPT  *chatgpt.Client
-    Requests *requests.Suggestions
+	ChatGPT  *chatgpt.Client
+	Requests *requests.Suggestions
 }
 
 type Server struct {
-    cg  *chatgpt.Client
-    req *requests.Suggestions
+	cg  *chatgpt.Client
+	req *requests.Suggestions
 }
 
 func New(opts Options) *Server {
-    return &Server{cg: opts.ChatGPT, req: opts.Requests}
+	return &Server{cg: opts.ChatGPT, req: opts.Requests}
 }
 
 func (s *Server) Router() http.Handler {
-    mux := http.NewServeMux()
+	mux := http.NewServeMux()
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
 	})
 
-    mux.HandleFunc("/api/suggestions/product-description", s.postProductDescription)
-    mux.HandleFunc("/api/suggestions/categories", s.getCategories)
-    mux.HandleFunc("/api/suggestions/personas", s.postPersonas)
-    mux.HandleFunc("/api/suggestions/questions", s.postQuestions)
-    mux.HandleFunc("/api/suggestions/question_types", s.getQuestionTypes)
-    mux.HandleFunc("/ui", s.getUIIndex)
-    mux.HandleFunc("/ui/", s.serveUI)
+	mux.HandleFunc("/api/suggestions/product-description", s.postProductDescription)
+	mux.HandleFunc("/api/suggestions/categories", s.getCategories)
+	mux.HandleFunc("/api/suggestions/personas", s.postPersonas)
+	mux.HandleFunc("/api/suggestions/questions", s.postQuestions)
+	mux.HandleFunc("/api/suggestions/question_types", s.getQuestionTypes)
+	mux.HandleFunc("/ui", s.getUIIndex)
+	mux.HandleFunc("/ui/", s.serveUI)
 
 	return cors(logging(mux))
 }
-
 
 func (s *Server) postProductDescription(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	var payload struct {
-		Identifier string `json:"identifier"`
-		Model      string `json:"model,omitempty"`
-	}
+	var payload api.ProductDescriptionRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		http.Error(w, "invalid json", http.StatusBadRequest)
 		return
@@ -63,16 +60,16 @@ func (s *Server) postProductDescription(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-    if s.req == nil {
-        http.Error(w, "server misconfigured: requests not initialized", http.StatusInternalServerError)
-        return
-    }
-    prod, usage, err := s.req.GetDescription(r.Context(), payload.Identifier, payload.Model)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadGateway)
-        return
-    }
-    writeJSON(w, http.StatusOK, map[string]any{"product": prod, "metadata": map[string]any{"usage": usage}})
+	if s.req == nil {
+		http.Error(w, "server misconfigured: requests not initialized", http.StatusInternalServerError)
+		return
+	}
+	prod, usage, err := s.req.GetDescription(r.Context(), payload.Identifier)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"product": prod, "metadata": map[string]any{"usage": usage}})
 }
 
 func (s *Server) getCategories(w http.ResponseWriter, r *http.Request) {
@@ -85,75 +82,70 @@ func (s *Server) getCategories(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) postPersonas(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodPost {
-        http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-        return
-    }
-    var payload struct {
-        Product models.ProductDescription `json:"product"`
-        Model   string                   `json:"model,omitempty"`
-        Count   int                      `json:"count,omitempty"`
-    }
-    if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-        http.Error(w, "invalid json", http.StatusBadRequest)
-        return
-    }
-    if s.req == nil {
-        http.Error(w, "server misconfigured: requests not initialized", http.StatusInternalServerError)
-        return
-    }
-    // Require a product description in request
-    if (payload.Product == models.ProductDescription{}) {
-        http.Error(w, "product description is required", http.StatusBadRequest)
-        return
-    }
-    personas, usage, err := s.req.GetPersonas(r.Context(), payload.Product, payload.Model, payload.Count)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadGateway)
-        return
-    }
-    writeJSON(w, http.StatusOK, map[string]any{"personas": personas, "metadata": map[string]any{"usage": usage}})
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var payload api.PersonasRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+	if s.req == nil {
+		http.Error(w, "server misconfigured: requests not initialized", http.StatusInternalServerError)
+		return
+	}
+	// Require a product description in request
+	if (payload.Product == models.ProductDescription{}) {
+		http.Error(w, "product description is required", http.StatusBadRequest)
+		return
+	}
+	personas, usage, err := s.req.GetPersonas(r.Context(), payload.Product, payload.Count)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"personas": personas, "metadata": map[string]any{"usage": usage}})
 }
 
 func (s *Server) postQuestions(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodPost {
-        http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-        return
-    }
-    var payload struct {
-        Product models.ProductDescription `json:"product"`
-        Model   string                   `json:"model,omitempty"`
-        Count   int                      `json:"count,omitempty"`
-        Type    models.QuestionTypeInfo  `json:"type"`
-    }
-    if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-        http.Error(w, "invalid json", http.StatusBadRequest)
-        return
-    }
-    if s.req == nil {
-        http.Error(w, "server misconfigured: requests not initialized", http.StatusInternalServerError)
-        return
-    }
-    if (payload.Product == models.ProductDescription{}) {
-        http.Error(w, "product description is required", http.StatusBadRequest)
-        return
-    }
-    questions, usage, err := s.req.GetQuestions(r.Context(), payload.Product, payload.Model, payload.Count, payload.Type)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadGateway)
-        return
-    }
-    writeJSON(w, http.StatusOK, map[string]any{"questions": questions, "metadata": map[string]any{"usage": usage}})
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var payload api.QuestionsRequest
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+	if s.req == nil {
+		http.Error(w, "server misconfigured: requests not initialized", http.StatusInternalServerError)
+		return
+	}
+	if (payload.Product == models.ProductDescription{}) {
+		http.Error(w, "product description is required", http.StatusBadRequest)
+		return
+	}
+	questions, usage, err := s.req.GetQuestions(r.Context(), payload.Product, payload.Count, payload.QuestionType)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"questions": questions, "metadata": map[string]any{"usage": usage}})
 }
 
 // getQuestionTypes returns the available question type catalog (key, title, description).
 func (s *Server) getQuestionTypes(w http.ResponseWriter, r *http.Request) {
-    if r.Method != http.MethodGet {
-        http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-        return
-    }
-    // Return the full catalog, prompts included (client can ignore prompts)
-    writeJSON(w, http.StatusOK, map[string]any{"types": models.QuestionTypeCatalog})
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	// Return the catalog from the suggestions service (no internal prompts)
+	if s.req == nil {
+		http.Error(w, "server misconfigured: requests not initialized", http.StatusInternalServerError)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"types": s.req.QuestionTypeCatalog()})
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

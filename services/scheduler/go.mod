@@ -8,3 +8,4 @@ require (
 )
 
 replace llm-your-business/schemas => ../../schemas/go
+replace llm-your-business/services/go/models => ../go/models

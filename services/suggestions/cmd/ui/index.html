@@ -147,6 +147,7 @@
         const kv = document.createElement('div'); kv.className = 'kvs'; kv.style.marginTop = '8px';
         kv.innerHTML = '<div class="muted">Name</div><div>'+(prod.name||'')+'</div>'+
                        '<div class="muted">Website</div><div>'+(prod.website||'')+'</div>'+
+                       '<div class="muted">Category</div><div>'+(prod.product_category||'')+'</div>'+
                        (prod.product_short_description?('<div class="muted">Summary</div><div>'+prod.product_short_description+'</div>'):'');
         card.appendChild(kv);
 
@@ -377,9 +378,11 @@
         if (!currentProduct) { $("errorPersonas").textContent = 'Please fetch a product description first.'; return; }
         try {
           const qtypeKey = document.getElementById('qtype').value;
-          const qtype = questionTypeMap[qtypeKey] || { key:qtypeKey };
+          // Send question_type only for the questions endpoint
           const res = await fetch(baseUrl + '/api/suggestions/questions', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ product: currentProduct, count, type: qtype })
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ product: currentProduct, count, question_type: qtypeKey })
           });
           const text = await res.text();
           if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);

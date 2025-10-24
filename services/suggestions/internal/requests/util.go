@@ -1,9 +1,9 @@
 package requests
 
 import (
-    "fmt"
-    "reflect"
-    "strings"
+	"fmt"
+	"reflect"
+	"strings"
 )
 
 // structJSONFormat creates a JSON-shaped guidance string for a struct type.
@@ -83,94 +83,94 @@ func fieldTypeLabel(t reflect.Type) string {
 // - extracting the first balanced JSON object/array
 // If wantArray is true, it prefers extracting an array; otherwise an object.
 func normalizeJSON(s string, wantArray bool) string {
-    s = strings.TrimSpace(s)
-    // Strip markdown code fences if present
-    s = stripCodeFences(s)
-    s = strings.TrimSpace(s)
-    if wantArray {
-        if strings.HasPrefix(s, "[") {
-            return s
-        }
-        if arr := extractBalanced(s, '[', ']'); arr != "" {
-            return arr
-        }
-    } else {
-        if strings.HasPrefix(s, "{") {
-            return s
-        }
-        if obj := extractBalanced(s, '{', '}'); obj != "" {
-            return obj
-        }
-    }
-    return s
+	s = strings.TrimSpace(s)
+	// Strip markdown code fences if present
+	s = stripCodeFences(s)
+	s = strings.TrimSpace(s)
+	if wantArray {
+		if strings.HasPrefix(s, "[") {
+			return s
+		}
+		if arr := extractBalanced(s, '[', ']'); arr != "" {
+			return arr
+		}
+	} else {
+		if strings.HasPrefix(s, "{") {
+			return s
+		}
+		if obj := extractBalanced(s, '{', '}'); obj != "" {
+			return obj
+		}
+	}
+	return s
 }
 
 func stripCodeFences(s string) string {
-    t := strings.TrimSpace(s)
-    if !strings.Contains(t, "```") {
-        return s
-    }
-    // Try to take the first fenced block if present
-    start := strings.Index(t, "```")
-    if start >= 0 {
-        rest := t[start+3:]
-        // Optional language tag until newline
-        if i := strings.IndexByte(rest, '\n'); i >= 0 {
-            rest = rest[i+1:]
-        } else {
-            // No newline, return original without change
-            return s
-        }
-        // Find closing fence
-        if end := strings.Index(rest, "```"); end >= 0 {
-            return rest[:end]
-        }
-        // If no closing, fall through
-    }
-    // Fallback: remove all fences tokens
-    t = strings.ReplaceAll(t, "```json", "")
-    t = strings.ReplaceAll(t, "```JSON", "")
-    t = strings.ReplaceAll(t, "```", "")
-    return t
+	t := strings.TrimSpace(s)
+	if !strings.Contains(t, "```") {
+		return s
+	}
+	// Try to take the first fenced block if present
+	start := strings.Index(t, "```")
+	if start >= 0 {
+		rest := t[start+3:]
+		// Optional language tag until newline
+		if i := strings.IndexByte(rest, '\n'); i >= 0 {
+			rest = rest[i+1:]
+		} else {
+			// No newline, return original without change
+			return s
+		}
+		// Find closing fence
+		if end := strings.Index(rest, "```"); end >= 0 {
+			return rest[:end]
+		}
+		// If no closing, fall through
+	}
+	// Fallback: remove all fences tokens
+	t = strings.ReplaceAll(t, "```json", "")
+	t = strings.ReplaceAll(t, "```JSON", "")
+	t = strings.ReplaceAll(t, "```", "")
+	return t
 }
 
 // extractBalanced returns the first balanced {..} or [..] block starting from the first startRune.
 func extractBalanced(s string, startRune, endRune rune) string {
-    // Find first occurrence
-    start := strings.IndexRune(s, startRune)
-    if start < 0 {
-        return ""
-    }
-    depth := 0
-    inString := false
-    escaped := false
-    for i, r := range s[start:] {
-        if inString {
-            if escaped {
-                escaped = false
-                continue
-            }
-            if r == '\\' {
-                escaped = true
-                continue
-            }
-            if r == '"' {
-                inString = false
-            }
-            continue
-        }
-        switch r {
-        case '"':
-            inString = true
-        case startRune:
-            depth++
-        case endRune:
-            depth--
-            if depth == 0 {
-                // Include up to current rune
-                return s[start : start+i+1]
-            }
-        }
-    }
-    return ""
+	// Find first occurrence
+	start := strings.IndexRune(s, startRune)
+	if start < 0 {
+		return ""
+	}
+	depth := 0
+	inString := false
+	escaped := false
+	for i, r := range s[start:] {
+		if inString {
+			if escaped {
+				escaped = false
+				continue
+			}
+			if r == '\\' {
+				escaped = true
+				continue
+			}
+			if r == '"' {
+				inString = false
+			}
+			continue
+		}
+		switch r {
+		case '"':
+			inString = true
+		case startRune:
+			depth++
+		case endRune:
+			depth--
+			if depth == 0 {
+				// Include up to current rune
+				return s[start : start+i+1]
+			}
+		}
+	}
+	return ""
 }

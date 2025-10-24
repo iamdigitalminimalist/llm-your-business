@@ -1,18 +1,18 @@
 package main
 
 import (
-    "context"
-    "log"
-    "net/http"
-    "os"
-    "os/signal"
-    "syscall"
-    "time"
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-    "llm-your-business/services/suggestions/internal/chatgpt"
-    "llm-your-business/services/suggestions/internal/config"
-    "llm-your-business/services/suggestions/internal/requests"
-    "llm-your-business/services/suggestions/internal/server"
+	"llm-your-business/services/suggestions/internal/chatgpt"
+	"llm-your-business/services/suggestions/internal/config"
+	"llm-your-business/services/suggestions/internal/requests"
+	"llm-your-business/services/suggestions/internal/server"
 )
 
 func main() {
@@ -37,9 +37,9 @@ func main() {
 		log.Fatalf("chatgpt init error: %v", err)
 	}
 
-    // High-level requests wrapper and HTTP server
-    reqs := requests.New(cg)
-    srv := server.New(server.Options{ChatGPT: cg, Requests: reqs})
+	// High-level requests wrapper and HTTP server
+	reqs := requests.New(cg)
+	srv := server.New(server.Options{ChatGPT: cg, Requests: reqs})
 
 	httpSrv := &http.Server{
 		Addr:              ":" + cfg.Port,

@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Suggestions: Product Description</title>
+    <style>
+      :root {
+        --bg:#0d1117; --text:#e6edf3; --muted:#97a3b6;
+        --card:#0f1724; --card-border:#1f2a44; --shadow: 0 8px 30px rgba(0,0,0,0.25);
+        --pill-bg:#192745; --pill-border:#2a3c66; --pill-text:#c9d7ff;
+        --accent:#6ea8fe; --accent-2:#7ee787; --accent-3:#f2cc60; --accent-4:#ff9bce; --accent-5:#b794f4;
+      }
+      * { box-sizing: border-box; }
+      body { background: var(--bg); color: var(--text); font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; }
+      header { position: sticky; top:0; z-index: 5; backdrop-filter: blur(8px); background: rgba(13,17,23,0.7); border-bottom:1px solid #172036; }
+      header .inner { max-width: 1140px; margin: 0 auto; padding: 14px 20px; display:flex; align-items:center; gap: 10px; }
+      header h1 { font-size: 16px; margin: 0; }
+      main { max-width: 1140px; margin: 0 auto; padding: 20px; }
+      label { display:block; margin: 8px 0 6px; color: var(--muted); font-weight: 600; }
+      input[type="text"], input[type="number"], textarea { width:100%; background:#0b1322; color:var(--text); border:1px solid #1c2742; border-radius:10px; padding:10px; }
+      button { appearance: none; border-radius:10px; border:1px solid #2a3b62; background:#182342; color:var(--text); padding:10px 14px; font-weight:600; cursor:pointer; }
+      button:hover { background:#1d2a50; }
+      .btn-primary { border-color:#3c5aa8; background:#1a2c69; color:#e1eaff; }
+      .row { display:grid; grid-template-columns: 1.6fr 1fr auto; gap: 10px; align-items:end; max-width: 1140px; }
+      .muted { color: var(--muted); font-size: 0.9rem; }
+      .error { color: #ff8fa3; white-space: pre-wrap; }
+      .layout { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: start; margin-top: 18px; }
+      .card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; box-shadow: var(--shadow); padding: 14px; }
+      .card h3 { margin: 0 0 8px; font-size: 16px; }
+      .actions { display:flex; gap:8px; }
+      .btn-danger { border-color:#6b2a3a; background:#3a1620; color:#ffd7dc; }
+      .btn-danger:hover { background:#461b27; }
+      .kvs { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; }
+      .pill { display:inline-block; padding: 2px 8px; border-radius: 999px; background: var(--pill-bg); border: 1px solid var(--pill-border); color: var(--pill-text); font-size: 12px; }
+      .product-card .head { display:flex; justify-content:space-between; gap:12px; align-items: center; }
+      .persona-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+      /* Persona palette */
+      .persona-card.persona-0 { border-color: rgba(110,168,254,.3); box-shadow: 0 8px 24px rgba(110,168,254,.08); }
+      .persona-card.persona-1 { border-color: rgba(126,231,135,.3); box-shadow: 0 8px 24px rgba(126,231,135,.08); }
+      .persona-card.persona-2 { border-color: rgba(242,204,96,.3); box-shadow: 0 8px 24px rgba(242,204,96,.08); }
+      .persona-card.persona-3 { border-color: rgba(183,148,244,.3); box-shadow: 0 8px 24px rgba(183,148,244,.08); }
+      .persona-card.persona-4 { border-color: rgba(255,155,206,.3); box-shadow: 0 8px 24px rgba(255,155,206,.08); }
+      /* Questions palette (distinct) */
+      .question-card.question-0 { border-color: rgba(126,231,185,.35); box-shadow: 0 8px 24px rgba(126,231,185,.08); }
+      .question-card.question-1 { border-color: rgba(255,201,140,.35); box-shadow: 0 8px 24px rgba(255,201,140,.08); }
+      .question-card.question-2 { border-color: rgba(159,200,255,.35); box-shadow: 0 8px 24px rgba(159,200,255,.08); }
+      .question-card.question-3 { border-color: rgba(255,170,170,.35); box-shadow: 0 8px 24px rgba(255,170,170,.08); }
+      .question-card.question-4 { border-color: rgba(196,171,255,.35); box-shadow: 0 8px 24px rgba(196,171,255,.08); }
+      .hrow { display:flex; gap:10px; align-items:end; }
+      .hrow > * { flex: 1 1 auto; }
+      .hrow > button { flex: 0 0 auto; }
+      details summary { cursor: pointer; user-select: none; }
+      pre.json { margin: 8px 0 0; background:#0b1322; color:#cfe1ff; border:1px solid #1c2742; padding:10px; border-radius:10px; white-space:pre-wrap; }
+      details { margin-top: 10px; }
+      .sep { border:0; border-top:1px solid #1f2a44; margin: 12px 0; }
+      @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .row { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header><div class="inner"><h1>Suggestions Demo</h1><span class="muted">Product + Personas + Questions</span></div></header>
+    <main>
+    <div class="row">
+      <div>
+        <label for="baseUrl">Service Base URL</label>
+        <input id="baseUrl" type="text" value="http://localhost:8085" />
+      </div>
+      <div>
+        <label for="identifier">Identifier (name, website, or details)</label>
+        <input id="identifier" type="text" placeholder="e.g. https://example.com or Acme CRM" />
+      </div>
+      <div>
+        <button id="submit" class="btn-primary">Fetch Product</button>
+      </div>
+
+    </div>
+
+      <!-- Full-width product card above personas/questions, outside the input grid -->
+      <div id="productCardTop" style="margin-top:18px;"></div>
+
+      <details id="productDetails">
+        <summary style="cursor:pointer; user-select:none; margin-top: 1rem; font-weight:600;">Product Description (JSON)</summary>
+        <label for="output" class="muted" style="margin-top:0.5rem;">Parsed response shown as JSON</label>
+        <textarea id="output" rows="10" readonly></textarea>
+      </details>
+      <div id="error" class="error"></div>
+
+      <hr style="margin: 2rem 0;" />
+      <h2>Generate Personas</h2>
+      <p class="muted">POST /api/suggestions/personas</p>
+      <label for="count">Count</label>
+      <input id="count" type="number" min="1" max="10" value="3" />
+      <button id="submitPersonas" class="btn-primary" disabled>Generate Personas</button>
+      <div style="height:8px"></div>
+      <!-- Questions controls will appear after personas below -->
+
+      <details id="personasDetails">
+        <summary style="cursor:pointer; user-select:none; margin-top: 0.5rem; font-weight:600;">Personas (JSON)</summary>
+        <label for="outputPersonas" class="muted" style="margin-top:0.5rem;">Parsed response shown as JSON</label>
+        <textarea id="outputPersonas" rows="12" readonly></textarea>
+      </details>
+      <div id="errorPersonas" class="error"></div>
+
+      <div id="resultsRow" class="layout" style="display:none;">
+        <div>
+          <div id="personaCardsContainer" class="persona-grid"></div>
+        </div>
+        <div id="questionControls" style="display:none; margin-top:8px;">
+          <hr class="sep" />
+          <h2 style="margin:8px 0 8px;">Generate Questions</h2>
+          <label for="qtype">Question Type</label>
+          <div class="hrow">
+            <select id="qtype" style="background:#0b1322; color:#e6edf3; border:1px solid #1c2742; border-radius:10px; padding:10px;"></select>
+            <input id="qcount" type="number" min="1" max="20" value="5" />
+            <button id="submitQuestions" class="btn-primary" disabled>Generate Questions</button>
+          </div>
+        </div>
+        <div>
+          <div id="questionCardsContainer" class="persona-grid"></div>
+        </div>
+      </div>
+    </div>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      let currentProduct = null;
+      let currentPersonas = [];
+      let currentQuestions = [];
+
+      function renderProductCard(prod) {
+        const c = $("productCardTop");
+        c.innerHTML = '';
+        if (!prod) return;
+        const card = document.createElement('div'); card.className = 'card product-card';
+        const head = document.createElement('div'); head.className = 'head';
+        const left = document.createElement('div');
+        const h = document.createElement('h3'); h.textContent = prod.product_name || prod.name || 'Product'; left.appendChild(h);
+        const pill = document.createElement('span'); pill.className = 'pill'; pill.textContent = prod.product_category || 'Unknown'; left.appendChild(pill);
+        head.appendChild(left);
+        const actions = document.createElement('div'); actions.className = 'actions';
+        const btnEdit = document.createElement('button'); btnEdit.textContent = 'Edit'; btnEdit.className='btn-primary';
+        const btnDel = document.createElement('button'); btnDel.textContent = 'Delete'; btnDel.className='btn-danger';
+        actions.appendChild(btnEdit); actions.appendChild(btnDel);
+        head.appendChild(actions);
+        card.appendChild(head);
+        const kv = document.createElement('div'); kv.className = 'kvs'; kv.style.marginTop = '8px';
+        kv.innerHTML = '<div class="muted">Name</div><div>'+(prod.name||'')+'</div>'+
+                       '<div class="muted">Website</div><div>'+(prod.website||'')+'</div>'+
+                       (prod.product_short_description?('<div class="muted">Summary</div><div>'+prod.product_short_description+'</div>'):'');
+        card.appendChild(kv);
+
+        const det = document.createElement('details');
+        const sum = document.createElement('summary'); sum.textContent = 'JSON'; det.appendChild(sum);
+        const pre = document.createElement('pre'); pre.className='json'; pre.textContent = JSON.stringify(prod, null, 2); det.appendChild(pre);
+        card.appendChild(det);
+
+        btnEdit.onclick = () => {
+          openModal('Edit Product', (body)=>{
+            body.innerHTML = ''
+              + '<label>Name</label><input id="mName" type="text" value="' + (prod.name||'') + '">'
+              + '<label>Website</label><input id="mWebsite" type="text" value="' + (prod.website||'') + '">'
+              + '<label>Product Name</label><input id="mPName" type="text" value="' + (prod.product_name||'') + '">'
+              + '<label>Short Description</label><input id="mPShort" type="text" value="' + (prod.product_short_description||'') + '">'
+              + '<label>Category</label><input id="mPCat" type="text" value="' + (prod.product_category||'') + '">';
+          }, (close)=>{
+            prod.name = $("mName").value.trim();
+            prod.website = $("mWebsite").value.trim();
+            prod.product_name = $("mPName").value.trim();
+            prod.product_short_description = $("mPShort").value.trim();
+            prod.product_category = $("mPCat").value.trim();
+            currentProduct = prod; renderProductCard(currentProduct);
+            close();
+          });
+        };
+        btnDel.onclick = () => {
+          if (!confirm('Delete product card?')) return;
+          currentProduct = null; renderProductCard(currentProduct); renderPersonaCards(currentPersonas); renderQuestionCards(currentQuestions);
+          const btnP = document.getElementById('submitPersonas');
+          if (btnP) btnP.disabled = true;
+          const btnQ2 = document.getElementById('submitQuestions');
+          if (btnQ2) btnQ2.disabled = true;
+          const pw = document.getElementById('personasWaiting'); if (pw) pw.style.display = '';
+          const qw = document.getElementById('questionsWaiting'); if (qw) qw.style.display = '';
+        };
+        c.appendChild(card);
+      }
+
+      function renderPersonaCards(personas) {
+        const row = $("resultsRow"); row.style.display = (currentProduct || (personas && personas.length) || (currentQuestions && currentQuestions.length)) ? '' : 'none';
+        const c = $("personaCardsContainer"); c.innerHTML = '';
+        (personas||[]).forEach((p, i) => {
+          const card = document.createElement('div'); card.className = 'card persona-card persona-' + (i % 5);
+          const head = document.createElement('div'); head.className='head'; head.style.display='flex'; head.style.justifyContent='space-between'; head.style.alignItems='center'; head.style.gap='12px';
+          const h = document.createElement('h3'); h.textContent = p.name || 'Persona'; head.appendChild(h);
+          const actions = document.createElement('div'); actions.className='actions';
+          const btnEdit = document.createElement('button'); btnEdit.textContent='Edit'; btnEdit.className='btn-primary';
+          const btnDel = document.createElement('button'); btnDel.textContent='Delete'; btnDel.className='btn-danger';
+          actions.appendChild(btnEdit); actions.appendChild(btnDel); head.appendChild(actions);
+          card.appendChild(head);
+          if (p.short_description) { const sd = document.createElement('div'); sd.className='muted'; sd.textContent = p.short_description; card.appendChild(sd); }
+          if (p.description) { const d = document.createElement('div'); d.style.whiteSpace='pre-wrap'; d.style.marginTop='6px'; d.textContent = p.description; card.appendChild(d); }
+
+          const det = document.createElement('details');
+          const sum = document.createElement('summary'); sum.textContent = 'JSON'; det.appendChild(sum);
+          const pre = document.createElement('pre'); pre.className='json'; pre.textContent = JSON.stringify(p, null, 2); det.appendChild(pre);
+          card.appendChild(det);
+
+          btnEdit.onclick = () => {
+            openModal('Edit Persona', (body)=>{
+              body.innerHTML = ''
+                + '<label>Name</label><input id="pmName" type="text" value="' + (p.name||'') + '">'
+                + '<label>Short Description</label><input id="pmShort" type="text" value="' + (p.short_description||'') + '">'
+                + '<label>Description</label><textarea id="pmDesc" rows="6">' + (p.description||'') + '</textarea>';
+            }, (close)=>{
+              p.name = $("pmName").value.trim();
+              p.short_description = $("pmShort").value.trim();
+              p.description = $("pmDesc").value;
+              renderPersonaCards(currentPersonas);
+              close();
+            });
+          };
+          btnDel.onclick = () => {
+            if (!confirm('Delete this persona?')) return;
+            currentPersonas.splice(i,1); renderPersonaCards(currentPersonas);
+          };
+          c.appendChild(card);
+        });
+      }
+
+      function renderQuestionCards(questions){
+        const row = $("resultsRow"); row.style.display = (currentProduct || (questions && questions.length) || (currentPersonas && currentPersonas.length)) ? '' : 'none';
+        const c = $("questionCardsContainer"); c.innerHTML = '';
+        (questions||[]).forEach((q, i) => {
+          const card = document.createElement('div'); card.className = 'card question-card question-' + (i % 5);
+          const head = document.createElement('div'); head.className='head'; head.style.display='flex'; head.style.justifyContent='space-between'; head.style.alignItems='center'; head.style.gap='12px';
+          const h = document.createElement('h3'); h.textContent = 'Question ' + (i+1); head.appendChild(h);
+          const actions = document.createElement('div'); actions.className='actions';
+          const btnEdit = document.createElement('button'); btnEdit.textContent='Edit'; btnEdit.className='btn-primary';
+          const btnDel = document.createElement('button'); btnDel.textContent='Delete'; btnDel.className='btn-danger';
+          actions.appendChild(btnEdit); actions.appendChild(btnDel); head.appendChild(actions);
+          card.appendChild(head);
+          const d = document.createElement('div'); d.style.whiteSpace='pre-wrap'; d.style.marginTop='6px'; d.textContent = q; card.appendChild(d);
+          const det = document.createElement('details'); const sum=document.createElement('summary'); sum.textContent='JSON'; det.appendChild(sum);
+          const pre = document.createElement('pre'); pre.className='json'; pre.textContent = JSON.stringify({ text: q }, null, 2); det.appendChild(pre); card.appendChild(det);
+          btnEdit.onclick = () => {
+            openModal('Edit Question', (body)=>{
+              body.innerHTML = '<label>Question</label><textarea id="qmText" rows="4">'+q+'</textarea>';
+            }, (close)=>{
+              currentQuestions[i] = document.getElementById('qmText').value;
+              renderQuestionCards(currentQuestions); close();
+            });
+          };
+          btnDel.onclick = () => { if(confirm('Delete question?')){ currentQuestions.splice(i,1); renderQuestionCards(currentQuestions); }};
+          c.appendChild(card);
+        });
+      }
+
+      function openModal(title, bodyBuilder, onSave){
+        const modal = document.getElementById('modal');
+        document.getElementById('modalTitle').textContent = title;
+        const body = document.getElementById('modalBody');
+        body.innerHTML = ''; bodyBuilder(body);
+        const save = document.getElementById('modalSave');
+        const cancel = document.getElementById('modalCancel');
+        const close = () => modal.close();
+        cancel.onclick = close; save.onclick = () => onSave(close);
+        modal.showModal();
+      }
+      $("submit").addEventListener("click", async () => {
+        const baseUrl = $("baseUrl").value.trim().replace(/\/$/, "");
+        const identifier = $("identifier").value.trim();
+        $("error").textContent = "";
+        $("output").value = "";
+        if (!identifier) {
+          $("error").textContent = "Please enter an identifier.";
+          return;
+        }
+        try {
+          const res = await fetch(baseUrl + "/api/suggestions/product-description", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ identifier }),
+          });
+          const text = await res.text();
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${text}`);
+          }
+          let json;
+          try { json = JSON.parse(text); } catch (e) { json = { raw: text }; }
+          $("output").value = JSON.stringify(json, null, 2);
+          // Store product for personas request
+          currentProduct = (json && json.product) ? json.product : null;
+          renderProductCard(currentProduct);
+          renderPersonaCards(currentPersonas);
+          // Enable/disable personas & questions buttons based on availability
+          const btnP = document.getElementById('submitPersonas');
+          if (btnP) btnP.disabled = !currentProduct;
+          const btnQ2 = document.getElementById('submitQuestions');
+          if (btnQ2) btnQ2.disabled = !currentProduct;
+          // waiting messages
+          const pw = document.getElementById('personasWaiting'); if (pw) pw.style.display = currentProduct ? 'none' : '';
+          const qw = document.getElementById('questionsWaiting'); if (qw) qw.style.display = currentProduct ? 'none' : '';
+          if (currentProduct) {
+            // expand the details briefly then collapse to show it's available
+            const det = $("productDetails");
+            det.open = false; // keep collapsed by default
+          }
+        } catch (e) {
+          $("error").textContent = String(e);
+        }
+      });
+
+      $("submitPersonas").addEventListener("click", async () => {
+        const baseUrl = $("baseUrl").value.trim().replace(/\/$/, "");
+        const identifier = $("identifier").value.trim();
+        const count = parseInt($("count").value, 10) || 3;
+        $("errorPersonas").textContent = "";
+        $("outputPersonas").value = "";
+        currentPersonas = [];
+        if (!currentProduct) {
+          $("errorPersonas").textContent = "Please fetch a product description first.";
+          return;
+        }
+        try {
+          const res = await fetch(baseUrl + "/api/suggestions/personas", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product: currentProduct, count }),
+          });
+          const text = await res.text();
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${text}`);
+          }
+          let json;
+          try { json = JSON.parse(text); } catch (e) { json = { raw: text }; }
+          $("outputPersonas").value = JSON.stringify(json, null, 2);
+          $("personasDetails").open = false; // keep collapsed by default
+          const personas = json && json.personas; currentPersonas = Array.isArray(personas) ? personas : [];
+          renderProductCard(currentProduct);
+          renderPersonaCards(currentPersonas);
+          renderQuestionCards(currentQuestions);
+        } catch (e) {
+          $("errorPersonas").textContent = String(e);
+        }
+      });
+
+      // Load question types
+      let questionTypeMap = {};
+      async function loadQuestionTypes(){
+        const baseUrl = $("baseUrl").value.trim().replace(/\/$/,"");
+        const sel = $("qtype"); sel.innerHTML = '';
+        try{
+          const res = await fetch(baseUrl+"/api/suggestions/question_types");
+          if(!res.ok){ throw new Error('HTTP '+res.status); }
+          const data = await res.json();
+          const types = Array.isArray(data.types)?data.types:[];
+          questionTypeMap = {};
+          for(const t of types){
+            const opt = document.createElement('option');
+            opt.value = t.key; opt.textContent = t.title || t.key; sel.appendChild(opt);
+            questionTypeMap[t.key] = t;
+          }
+        }catch(e){
+          const fallback = { key:'top_10', title:'Top 10 in Category', description:'', prompt:'' };
+          const opt = document.createElement('option'); opt.value=fallback.key; opt.textContent=fallback.title; sel.appendChild(opt);
+          questionTypeMap[fallback.key] = fallback;
+        }
+        // Reveal question controls when types are loaded (and product exists)
+        document.getElementById('questionControls').style.display = '';
+      }
+      loadQuestionTypes();
+      document.getElementById('submitQuestions').addEventListener('click', async ()=>{
+        const baseUrl = $("baseUrl").value.trim().replace(/\/$/, "");
+        const count = parseInt($("qcount").value, 10) || 5;
+        $("errorPersonas").textContent = '';
+        if (!currentProduct) { $("errorPersonas").textContent = 'Please fetch a product description first.'; return; }
+        try {
+          const qtypeKey = document.getElementById('qtype').value;
+          const qtype = questionTypeMap[qtypeKey] || { key:qtypeKey };
+          const res = await fetch(baseUrl + '/api/suggestions/questions', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ product: currentProduct, count, type: qtype })
+          });
+          const text = await res.text();
+          if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
+          let json; try { json = JSON.parse(text); } catch(e) { json = { raw: text }; }
+          const qs = json && json.questions; currentQuestions = Array.isArray(qs) ? qs : [];
+          renderProductCard(currentProduct); renderPersonaCards(currentPersonas); renderQuestionCards(currentQuestions);
+        } catch(e) {
+          $("errorPersonas").textContent = String(e);
+        }
+      });
+    </script>
+    <dialog id="modal" style="border:none;border-radius:12px;padding:0;width:min(560px,92vw);background:#0f1724;color:#e6edf3;">
+      <div style="padding:16px;">
+        <h3 id="modalTitle" style="margin:0 0 10px;">Edit</h3>
+        <div id="modalBody"></div>
+      </div>
+      <div style="padding:12px 16px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #1f2a44;background:#0b1322;">
+        <button id="modalCancel">Cancel</button>
+        <button id="modalSave" class="btn-primary">Save</button>
+      </div>
+    </dialog>
+  </body>
+  </html>
