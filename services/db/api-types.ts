@@ -34,12 +34,9 @@ export const ApiErrorSchema = z.object({
 });
 
 export const PartnerTypeEnum = z.enum([
-  'RESTAURANT',
-  'TECH',
-  'RETAIL',
-  'SERVICE',
-  'HEALTHCARE',
-  'EDUCATION',
+  'MARKETING_AGENCY',
+  'CONSULTING_SERVICE',
+  'TECH_COMPANY',
   'OTHER',
 ]);
 export const ProductTypeEnum = z.enum([
@@ -48,12 +45,15 @@ export const ProductTypeEnum = z.enum([
   'DIGITAL_SERVICE',
   'EXPERIENCE',
 ]);
-export const LLMModelEnum = z.enum([
-  'GPT_4O',
-  'GPT_4O_MINI',
-  'CLAUDE_3_5_SONNET',
-  'GEMINI_PRO',
+export const ObjectiveTypeEnum = z.enum([
+  'TOP_5_RECOMMENDATIONS',
+  'TOP_10_RECOMMENDATIONS',
+  'COMPETITOR_ANALYSIS',
+  'PROS_AND_CONS',
+  'MARKET_POSITION',
+  'PRICING_ANALYSIS',
 ]);
+export const LLMModelEnum = z.enum(['GPT_4O', 'GPT_4O_MINI', 'GPT_3_5_TURBO']);
 export const EvaluationStatusEnum = z.enum([
   'PENDING',
   'IN_PROGRESS',
@@ -174,13 +174,13 @@ export const ObjectiveDataSchema = z.object({
     .string()
     .min(1, 'Objective title is required')
     .max(200, 'Title too long'),
-  question: z
+  description: z
     .string()
-    .min(1, 'Question is required')
-    .max(2000, 'Question too long'),
-  partnerId: ObjectIdSchema,
-  productId: ObjectIdSchema,
-  llmModels: z.array(LLMModelEnum).min(1, 'At least one LLM model is required'),
+    .min(1, 'Description is required')
+    .max(2000, 'Description too long'),
+  type: ObjectiveTypeEnum,
+  models: z.array(LLMModelEnum).min(1, 'At least one LLM model is required'),
+  partnerId: ObjectIdSchema.optional(),
 });
 
 // Request schemas
@@ -193,10 +193,10 @@ export const UpdateObjectiveRequestSchema =
 // Response schema (includes MongoDB fields)
 export const ObjectiveResponseSchema = BaseDocumentSchema.extend({
   title: z.string(),
-  question: z.string(),
-  partnerId: z.string(),
-  productId: z.string(),
-  llmModels: z.array(LLMModelEnum),
+  description: z.string(),
+  type: ObjectiveTypeEnum,
+  models: z.array(LLMModelEnum),
+  partnerId: z.string().nullable(),
 });
 
 // =============================================================================
@@ -312,6 +312,7 @@ export type ApiError = z.infer<typeof ApiErrorSchema>;
 // Enum types
 export type PartnerType = z.infer<typeof PartnerTypeEnum>;
 export type ProductType = z.infer<typeof ProductTypeEnum>;
+export type ObjectiveType = z.infer<typeof ObjectiveTypeEnum>;
 export type LLMModel = z.infer<typeof LLMModelEnum>;
 export type EvaluationStatus = z.infer<typeof EvaluationStatusEnum>;
 

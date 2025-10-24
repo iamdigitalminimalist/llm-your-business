@@ -32,8 +32,9 @@ export const partnerService = {
     return {
       ...partner,
       productCount: partner.products?.length || 0,
-      evaluationCount: partner.evaluations?.length || 0,
-      hasActiveProducts: partner.products?.some((p) => p.isActive) || false,
+      executionCount: partner.executions?.length || 0,
+      hasActiveProducts:
+        partner.products?.some((p: any) => p.isActive) || false,
     };
   },
 

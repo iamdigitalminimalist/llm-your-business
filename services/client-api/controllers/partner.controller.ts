@@ -16,9 +16,30 @@ import {
 import {
   safeValidateRequest,
   createApiResponse,
-  transformPrismaToApi,
   extractPagination,
 } from '@shared/db/validation';
+
+// Custom transformation for partners to handle missing fields from old schema
+function transformPartnerToApi(partner: any): PartnerResponse {
+  return {
+    id: partner.id,
+    publicId: partner.id, // Use id as publicId since publicId doesn't exist in new schema
+    name: partner.name,
+    description: partner.description,
+    partnerType: partner.partnerType,
+    website: partner.website,
+    addressLine1: null, // Not in new schema
+    addressLine2: null, // Not in new schema
+    city: null, // Not in new schema
+    state: null, // Not in new schema
+    country: partner.country,
+    postalCode: null, // Not in new schema
+    industry: partner.industry,
+    isActive: partner.isActive,
+    createdAt: partner.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: partner.updatedAt?.toISOString() || new Date().toISOString(),
+  };
+}
 
 export const partnerController = {
   getPartners: async (req: Request, res: Response) => {
@@ -28,7 +49,7 @@ export const partnerController = {
       // Validate query parameters
       const filtersValidation = safeValidateRequest(
         PartnerFiltersSchema,
-        toCamel(req.query as any)
+        toCamel(req.query)
       );
       if (!filtersValidation.success) {
         return res.status(400).json(filtersValidation.error);
@@ -46,8 +67,9 @@ export const partnerController = {
       console.info(`✅ Found ${partners.length} partners (${total} total)`);
 
       // Transform Prisma data to API format
-      const transformedPartners: PartnerResponse[] =
-        partners.map(transformPrismaToApi);
+      const transformedPartners: PartnerResponse[] = partners.map(
+        transformPartnerToApi
+      );
 
       res.json(
         toSnake(
@@ -85,7 +107,7 @@ export const partnerController = {
 
       const paramsValidation = safeValidateRequest(
         IdParamsSchema,
-        toCamel(req.params as any)
+        toCamel(req.params)
       );
       if (!paramsValidation.success) {
         return res.status(400).json(paramsValidation.error);
@@ -109,7 +131,8 @@ export const partnerController = {
       console.info('✅ Found partner:', partner.name);
 
       // Transform Prisma data to API format
-      const transformedPartner: PartnerResponse = transformPrismaToApi(partner);
+      const transformedPartner: PartnerResponse =
+        transformPartnerToApi(partner);
 
       res.json(
         toSnake(
@@ -141,7 +164,7 @@ export const partnerController = {
 
       const bodyValidation = safeValidateRequest(
         CreatePartnerRequestSchema,
-        toCamel(req.body as any)
+        toCamel(req.body)
       );
       if (!bodyValidation.success) {
         return res.status(400).json(bodyValidation.error);
@@ -153,7 +176,7 @@ export const partnerController = {
       console.info('✅ Partner created:', newPartner.name);
 
       const transformedPartner: PartnerResponse =
-        transformPrismaToApi(newPartner);
+        transformPartnerToApi(newPartner);
 
       res
         .status(201)
@@ -188,7 +211,7 @@ export const partnerController = {
       // Validate route parameters
       const paramsValidation = safeValidateRequest(
         IdParamsSchema,
-        toCamel(req.params as any)
+        toCamel(req.params)
       );
       if (!paramsValidation.success) {
         return res.status(400).json(paramsValidation.error);
@@ -197,7 +220,7 @@ export const partnerController = {
       // Validate request body
       const bodyValidation = safeValidateRequest(
         UpdatePartnerRequestSchema,
-        toCamel(req.body as any)
+        toCamel(req.body)
       );
       if (!bodyValidation.success) {
         return res.status(400).json(bodyValidation.error);
@@ -226,7 +249,7 @@ export const partnerController = {
       console.info('✅ Partner updated:', updatedPartner.name);
 
       const transformedPartner: PartnerResponse =
-        transformPrismaToApi(updatedPartner);
+        transformPartnerToApi(updatedPartner);
 
       res.json(
         toSnake(
@@ -259,7 +282,7 @@ export const partnerController = {
       // Validate route parameters
       const paramsValidation = safeValidateRequest(
         IdParamsSchema,
-        toCamel(req.params as any)
+        toCamel(req.params)
       );
       if (!paramsValidation.success) {
         return res.status(400).json(paramsValidation.error);

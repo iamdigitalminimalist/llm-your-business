@@ -2,8 +2,9 @@ import express, { type Request, type Response } from 'express';
 import { partnerController } from './controllers/partner.controller';
 import { productController } from './controllers/product.controller';
 import { objectiveController } from './controllers/objective.controller';
-import { evaluationController } from './controllers/evaluation.controller';
+import { executionController } from './controllers/execution.controller';
 import { dashboardController } from './controllers/dashboard.controller';
+import { personaController } from './controllers/persona.controller';
 
 const router = express.Router();
 
@@ -33,13 +34,18 @@ router.delete('/api/partners/:id', partnerController.deletePartner);
 // Product routes
 router.get('/api/products', productController.getProducts);
 router.get('/api/products/:id', productController.getProduct);
+router.post('/api/products', productController.createProduct);
+
+// Persona routes
+router.get('/api/personas', personaController.getPersonas);
+router.post('/api/personas', personaController.createPersona);
 
 // Objective routes
 router.get('/api/objectives', objectiveController.getObjectives);
 router.post('/api/objectives', objectiveController.createObjective);
 
-// Evaluation routes
-router.get('/api/evaluations', evaluationController.getEvaluations);
-router.post('/api/evaluation', evaluationController.createEvaluation);
+// Execution routes
+router.get('/api/executions', executionController.getExecutions);
+router.post('/api/executions', executionController.createExecution);
 
 export default router;

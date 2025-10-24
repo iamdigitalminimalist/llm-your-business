@@ -1,4 +1,4 @@
-import { evaluationRepository } from '../repositories/evaluation.repository';
+import { executionRepository } from '../repositories/execution.repository';
 import { objectiveRepository } from '../repositories/objective.repository';
 import { partnerRepository } from '../repositories/partner.repository';
 
@@ -33,31 +33,31 @@ export const dashboardService = {
     const objectives = await objectiveRepository.getObjectives();
     const activeObjectives = objectives.filter((o) => o.isActive).length;
 
-    // Get all evaluations
-    const evaluations = await evaluationRepository.getEvaluations();
-    const totalEvaluations = evaluations.length;
+    // Get all executions
+    const executions = await executionRepository.getExecutions();
+    const totalExecutions = executions.length;
 
-    // Calculate success rate (completed evaluations with mentions)
-    const successfulEvaluations = evaluations.filter(
-      (e) => e.status === 'COMPLETED' && e.mentionFound
+    // Calculate success rate (completed executions)
+    const successfulExecutions = executions.filter(
+      (e: any) => e.status === 'COMPLETED'
     ).length;
 
     const successRate =
-      totalEvaluations > 0
-        ? Math.round((successfulEvaluations / totalEvaluations) * 100)
+      totalExecutions > 0
+        ? Math.round((successfulExecutions / totalExecutions) * 100)
         : 0;
 
     console.info('✅ Dashboard stats calculated', {
       totalPartners,
       activeObjectives,
-      totalEvaluations,
+      totalEvaluations: totalExecutions,
       successRate,
     });
 
     return {
       totalPartners,
       activeObjectives,
-      totalEvaluations,
+      totalEvaluations: totalExecutions,
       successRate,
     };
   },
@@ -65,80 +65,28 @@ export const dashboardService = {
   getRecentEvaluations: async (
     limit: number = 5
   ): Promise<RecentEvaluation[]> => {
-    console.info('📋 Fetching recent evaluations...', { limit });
+    console.info('📋 Fetching recent executions...', { limit });
 
-    const evaluations = await evaluationRepository.getEvaluations();
+    const executions = await executionRepository.getExecutions();
 
-    // Group evaluations by objective to count models
-    const evaluationsByObjective = new Map<string, any[]>();
+    // For now, return a simplified version since executions have a different structure
+    // This would need to be properly implemented based on the new execution/insight flow
+    const recentEvaluations: RecentEvaluation[] = executions
+      .slice(0, limit)
+      .map((execution: any) => ({
+        id: execution.id,
+        partnerName: 'Partner', // Would need to include partner relation
+        productName: 'Product', // Would need to include product relation
+        objectiveTitle: 'Objective', // Would need to include objective relation
+        modelCount: 0,
+        totalModels: 1,
+        avgScore: null,
+        status: execution.status,
+        createdAt: execution.startedAt,
+      }));
 
-    evaluations.forEach((evaluation) => {
-      const objectiveId = evaluation.objectiveId;
-      if (!evaluationsByObjective.has(objectiveId)) {
-        evaluationsByObjective.set(objectiveId, []);
-      }
-      evaluationsByObjective.get(objectiveId)!.push(evaluation);
-    });
+    console.info(`✅ Retrieved ${recentEvaluations.length} recent executions`);
 
-    // Get the most recent evaluations per objective
-    const recentEvaluations: RecentEvaluation[] = [];
-
-    for (const [objectiveId, objEvaluations] of evaluationsByObjective) {
-      // Sort by creation date, most recent first
-      const sortedEvaluations = objEvaluations.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-
-      const mostRecent = sortedEvaluations[0];
-      if (
-        mostRecent &&
-        mostRecent.objective &&
-        mostRecent.partner &&
-        mostRecent.product
-      ) {
-        // Calculate average score for this objective
-        const completedEvaluations = objEvaluations.filter(
-          (e) => e.status === 'COMPLETED' && e.score !== null
-        );
-        const avgScore =
-          completedEvaluations.length > 0
-            ? completedEvaluations.reduce((sum, e) => sum + (e.score || 0), 0) /
-              completedEvaluations.length
-            : null;
-
-        // Count total models for this objective (from objective.llmModels)
-        const objective =
-          await objectiveRepository.getObjectiveById(objectiveId);
-        const totalModels = objective?.llmModels?.length || 0;
-        const completedModels = objEvaluations.filter(
-          (e) => e.status === 'COMPLETED'
-        ).length;
-
-        recentEvaluations.push({
-          id: mostRecent.id,
-          partnerName: mostRecent.partner.name,
-          productName: mostRecent.product.name,
-          objectiveTitle: mostRecent.objective.title,
-          modelCount: completedModels,
-          totalModels: totalModels,
-          avgScore: avgScore ? Math.round(avgScore * 10) / 10 : null,
-          status: mostRecent.status,
-          createdAt: mostRecent.createdAt,
-        });
-      }
-    }
-
-    // Sort by creation date and limit
-    const result = recentEvaluations
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
-      .slice(0, limit);
-
-    console.info(`✅ Retrieved ${result.length} recent evaluations`);
-
-    return result;
+    return recentEvaluations;
   },
 };

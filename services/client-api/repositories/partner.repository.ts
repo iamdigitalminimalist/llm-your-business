@@ -43,17 +43,11 @@ export const partnerRepository = {
       where,
       select: {
         id: true,
-        publicId: true,
         name: true,
         description: true,
         partnerType: true,
         website: true,
-        addressLine1: true,
-        addressLine2: true,
-        city: true,
-        state: true,
         country: true,
-        postalCode: true,
         industry: true,
         isActive: true,
         createdAt: true,
@@ -107,17 +101,11 @@ export const partnerRepository = {
       where: { id: id.toString() },
       select: {
         id: true,
-        publicId: true,
         name: true,
         description: true,
         partnerType: true,
         website: true,
-        addressLine1: true,
-        addressLine2: true,
-        city: true,
-        state: true,
         country: true,
-        postalCode: true,
         industry: true,
         isActive: true,
         createdAt: true,
@@ -131,7 +119,7 @@ export const partnerRepository = {
       where: { id: id.toString() },
       include: {
         products: true,
-        evaluations: {
+        executions: {
           include: {
             objective: true,
           },
@@ -143,23 +131,20 @@ export const partnerRepository = {
   createPartner: async (data: CreatePartnerRequest) => {
     return prisma.partner.create({
       data: {
-        ...data,
-        partnerType: data.partnerType, // Cast to Prisma enum
-        publicId: `partner_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: data.name,
+        description: data.description,
+        partnerType: data.partnerType,
+        website: data.website,
+        country: data.country,
+        industry: data.industry,
       },
       select: {
         id: true,
-        publicId: true,
         name: true,
         description: true,
         partnerType: true,
         website: true,
-        addressLine1: true,
-        addressLine2: true,
-        city: true,
-        state: true,
         country: true,
-        postalCode: true,
         industry: true,
         isActive: true,
         createdAt: true,
@@ -169,27 +154,25 @@ export const partnerRepository = {
   },
 
   updatePartner: async (id: ObjectId, data: UpdatePartnerRequest) => {
-    const updateData = { ...data };
-    if (updateData.partnerType) {
-      updateData.partnerType = data.partnerType;
-    }
+    const updateData: any = {};
+    if (data.name) updateData.name = data.name;
+    if (data.description) updateData.description = data.description;
+    if (data.partnerType) updateData.partnerType = data.partnerType;
+    if (data.website) updateData.website = data.website;
+    if (data.country) updateData.country = data.country;
+    if (data.industry) updateData.industry = data.industry;
+    if (typeof data.isActive === 'boolean') updateData.isActive = data.isActive;
 
     return prisma.partner.update({
       where: { id: id.toString() },
       data: updateData,
       select: {
         id: true,
-        publicId: true,
         name: true,
         description: true,
         partnerType: true,
         website: true,
-        addressLine1: true,
-        addressLine2: true,
-        city: true,
-        state: true,
         country: true,
-        postalCode: true,
         industry: true,
         isActive: true,
         createdAt: true,
