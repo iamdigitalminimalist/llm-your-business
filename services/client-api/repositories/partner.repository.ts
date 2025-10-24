@@ -4,14 +4,16 @@ import type {
   CreatePartnerRequest,
   UpdatePartnerRequest,
   PartnerFilters,
+  PartnerType,
 } from '@shared/db/api-types';
+import type { Prisma } from '@shared/db/types';
 
 export const partnerRepository = {
   getPartners: async (
     filters?: PartnerFilters,
     pagination?: { skip: number; limit: number }
   ) => {
-    const where: any = {};
+    const where: Prisma.PartnerWhereInput = {};
 
     // Apply filters
     if (filters) {
@@ -23,7 +25,7 @@ export const partnerRepository = {
       }
 
       if (filters.type) {
-        where.partnerType = filters.type;
+        where.partnerType = filters.type as PartnerType;
       }
 
       if (filters.industry) {
@@ -39,7 +41,7 @@ export const partnerRepository = {
       }
     }
 
-    const queryOptions: any = {
+    const queryOptions: Prisma.PartnerFindManyArgs = {
       where,
       select: {
         id: true,
@@ -65,7 +67,7 @@ export const partnerRepository = {
   },
 
   getPartnersCount: async (filters?: PartnerFilters) => {
-    const where: any = {};
+    const where: Prisma.PartnerWhereInput = {};
 
     // Apply same filters as in getPartners
     if (filters) {
@@ -77,7 +79,7 @@ export const partnerRepository = {
       }
 
       if (filters.type) {
-        where.partnerType = filters.type;
+        where.partnerType = filters.type as PartnerType;
       }
 
       if (filters.industry) {
@@ -133,7 +135,7 @@ export const partnerRepository = {
       data: {
         name: data.name,
         description: data.description,
-        partnerType: data.partnerType,
+        partnerType: data.partnerType as PartnerType,
         website: data.website,
         country: data.country,
         industry: data.industry,
@@ -154,10 +156,11 @@ export const partnerRepository = {
   },
 
   updatePartner: async (id: ObjectId, data: UpdatePartnerRequest) => {
-    const updateData: any = {};
+    const updateData: Prisma.PartnerUpdateInput = {};
     if (data.name) updateData.name = data.name;
     if (data.description) updateData.description = data.description;
-    if (data.partnerType) updateData.partnerType = data.partnerType;
+    if (data.partnerType)
+      updateData.partnerType = data.partnerType as PartnerType;
     if (data.website) updateData.website = data.website;
     if (data.country) updateData.country = data.country;
     if (data.industry) updateData.industry = data.industry;

@@ -1,5 +1,4 @@
 import { CreateObjectiveRequestSchema } from '@shared/db/api-types';
-import { safeValidateRequest } from '@shared/db/validation';
 import { objectiveRepository } from '../repositories/objective.repository';
 
 export const objectiveService = {
@@ -9,14 +8,11 @@ export const objectiveService = {
   },
 
   createObjective: async (request: unknown) => {
-    // Use Zod for proper validation
-    const validation = safeValidateRequest(
-      CreateObjectiveRequestSchema,
-      request
-    );
+    // Use Zod's safeParse for validation
+    const validation = CreateObjectiveRequestSchema.safeParse(request);
 
     if (!validation.success) {
-      throw new Error(validation.error.message);
+      throw new Error(`Validation failed: ${validation.error.message}`);
     }
 
     // Now we have properly validated data with correct types

@@ -1,6 +1,20 @@
 import { executionRepository } from '../repositories/execution.repository';
 import { objectiveRepository } from '../repositories/objective.repository';
 import { partnerRepository } from '../repositories/partner.repository';
+import type {
+  Execution,
+  Partner,
+  Product,
+  Objective,
+  Insight,
+} from '@shared/db/types';
+
+type ExecutionWithRelations = Execution & {
+  partner: Pick<Partner, 'id' | 'name'>;
+  product: Pick<Product, 'id' | 'name'>;
+  objective: Pick<Objective, 'id' | 'title'>;
+  insights: Insight[];
+};
 
 interface DashboardStats {
   totalPartners: number;
@@ -39,7 +53,7 @@ export const dashboardService = {
 
     // Calculate success rate (completed executions)
     const successfulExecutions = executions.filter(
-      (e: any) => e.status === 'COMPLETED'
+      (e: Execution) => e.status === 'COMPLETED'
     ).length;
 
     const successRate =
@@ -73,7 +87,7 @@ export const dashboardService = {
     // This would need to be properly implemented based on the new execution/insight flow
     const recentEvaluations: RecentEvaluation[] = executions
       .slice(0, limit)
-      .map((execution: any) => ({
+      .map((execution: ExecutionWithRelations) => ({
         id: execution.id,
         partnerName: 'Partner', // Would need to include partner relation
         productName: 'Product', // Would need to include product relation

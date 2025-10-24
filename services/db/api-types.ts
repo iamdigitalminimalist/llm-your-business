@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { $Enums } from './types';
 
 export const ObjectIdSchema = z
   .string()
@@ -33,39 +34,14 @@ export const ApiErrorSchema = z.object({
   statusCode: z.number().int().optional(),
 });
 
-export const PartnerTypeEnum = z.enum([
-  'MARKETING_AGENCY',
-  'CONSULTING_SERVICE',
-  'TECH_COMPANY',
-  'OTHER',
-]);
-export const ProductTypeEnum = z.enum([
-  'PHYSICAL_PRODUCT',
-  'SERVICE_LOCATION',
-  'DIGITAL_SERVICE',
-  'EXPERIENCE',
-]);
-export const ObjectiveTypeEnum = z.enum([
-  'TOP_5_RECOMMENDATIONS',
-  'TOP_10_RECOMMENDATIONS',
-  'COMPETITOR_ANALYSIS',
-  'PROS_AND_CONS',
-  'MARKET_POSITION',
-  'PRICING_ANALYSIS',
-]);
-export const LLMModelEnum = z.enum(['GPT_4O', 'GPT_4O_MINI', 'GPT_3_5_TURBO']);
-export const EvaluationStatusEnum = z.enum([
-  'PENDING',
-  'IN_PROGRESS',
-  'COMPLETED',
-  'FAILED',
-  'CANCELLED',
-  'TIMEOUT',
-]);
+export const PartnerTypeEnum = z.enum($Enums.PartnerType);
+export const ProductTypeEnum = z.enum($Enums.ProductType);
+export const ObjectiveTypeEnum = z.enum($Enums.ObjectiveType);
+export const LLMModelEnum = z.enum($Enums.LLMModel);
+export const ExecutionStatusEnum = z.enum($Enums.ExecutionStatus);
 
 export const BaseDocumentSchema = z.object({
   id: z.string(),
-  publicId: z.string(),
   isActive: z.boolean().default(true),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -76,15 +52,7 @@ export const PartnerDataSchema = z.object({
   description: z.string().max(2000, 'Description too long').optional(),
   partnerType: PartnerTypeEnum,
   website: z.string().url('Invalid website URL').optional().or(z.literal('')),
-  addressLine1: z.string().max(200, 'Address line 1 too long').optional(),
-  addressLine2: z.string().max(200, 'Address line 2 too long').optional(),
-  city: z.string().max(100, 'City name too long').optional(),
-  state: z.string().max(100, 'State name too long').optional(),
-  country: z
-    .string()
-    .min(1, 'Country is required')
-    .max(100, 'Country name too long'),
-  postalCode: z.string().max(20, 'Postal code too long').optional(),
+  country: z.string().max(100, 'Country name too long').default('US'),
   industry: z.string().max(100, 'Industry too long').optional(),
 });
 
@@ -100,12 +68,7 @@ export const PartnerResponseSchema = BaseDocumentSchema.extend({
   description: z.string().nullable(),
   partnerType: PartnerTypeEnum,
   website: z.string().nullable(),
-  addressLine1: z.string().nullable(),
-  addressLine2: z.string().nullable(),
-  city: z.string().nullable(),
-  state: z.string().nullable(),
   country: z.string(),
-  postalCode: z.string().nullable(),
   industry: z.string().nullable(),
 });
 
@@ -134,14 +97,6 @@ export const ProductDataSchema = z.object({
   name: z.string().min(1, 'Product name is required').max(200, 'Name too long'),
   description: z.string().max(2000, 'Description too long').optional(),
   productType: ProductTypeEnum,
-  price: z.number().positive('Price must be positive').optional(),
-  priceRange: z.string().max(50, 'Price range too long').optional(),
-  currency: z
-    .string()
-    .length(3, 'Currency must be 3 characters (ISO 4217)')
-    .optional(),
-  city: z.string().max(100, 'City name too long').optional(),
-  country: z.string().max(100, 'Country name too long').optional(),
   partnerId: ObjectIdSchema,
 });
 
@@ -156,12 +111,135 @@ export const ProductResponseSchema = BaseDocumentSchema.extend({
   name: z.string(),
   description: z.string().nullable(),
   productType: ProductTypeEnum,
-  price: z.number().nullable(),
-  priceRange: z.string().nullable(),
-  currency: z.string().nullable(),
-  city: z.string().nullable(),
-  country: z.string().nullable(),
   partnerId: z.string(),
+});
+
+// =============================================================================
+// PERSONA SCHEMAS
+// =============================================================================
+
+export const PersonaDataSchema = z.object({
+  name: z.string().min(1, 'Persona name is required').max(200, 'Name too long'),
+  description: z.string().max(2000, 'Description too long').optional(),
+  occupation: z.array(z.string()).min(1, 'At least one occupation is required'),
+  technicalSkills: z
+    .string()
+    .min(1, 'Technical skills description is required'),
+  goals: z.array(z.string()).min(1, 'At least one goal is required'),
+  motivations: z
+    .array(z.string())
+    .min(1, 'At least one motivation is required'),
+});
+
+// Request schemas
+export const CreatePersonaRequestSchema = PersonaDataSchema;
+export const UpdatePersonaRequestSchema = PersonaDataSchema.partial();
+
+// Response schema (includes MongoDB fields)
+export const PersonaResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  occupation: z.array(z.string()),
+  technicalSkills: z.string(),
+  goals: z.array(z.string()),
+  motivations: z.array(z.string()),
+  createdAt: z.string().datetime(),
+});
+
+// =============================================================================
+// EXECUTION SCHEMAS
+// =============================================================================
+
+export const ExecutionDataSchema = z.object({
+  partnerId: ObjectIdSchema,
+  productId: ObjectIdSchema,
+  objectiveId: ObjectIdSchema,
+});
+
+// Request schemas
+export const CreateExecutionRequestSchema = ExecutionDataSchema;
+
+// Response schema (includes MongoDB fields)
+export const ExecutionResponseSchema = BaseDocumentSchema.extend({
+  partnerId: z.string(),
+  productId: z.string(),
+  objectiveId: z.string(),
+  status: ExecutionStatusEnum,
+  startedAt: z.string().datetime(),
+  completedAt: z.string().datetime().nullable(),
+});
+
+// =============================================================================
+// QUESTION SCHEMAS
+// =============================================================================
+
+export const QuestionDataSchema = z.object({
+  template: z.string().min(1, 'Question template is required'),
+  placeholders: z.array(z.string()).default([]),
+  objectiveId: ObjectIdSchema,
+});
+
+// Request schemas
+export const CreateQuestionRequestSchema = QuestionDataSchema;
+export const UpdateQuestionRequestSchema = QuestionDataSchema.partial();
+
+// Response schema (includes MongoDB fields)
+export const QuestionResponseSchema = z.object({
+  id: z.string(),
+  template: z.string(),
+  placeholders: z.array(z.string()),
+  objectiveId: z.string(),
+});
+
+// =============================================================================
+// OBJECTIVE PARAMETER SCHEMAS
+// =============================================================================
+
+export const ObjectiveParameterDataSchema = z.object({
+  key: z.string().min(1, 'Parameter key is required'),
+  value: z.string().min(1, 'Parameter value is required'),
+  objectiveId: ObjectIdSchema,
+});
+
+// Request schemas
+export const CreateObjectiveParameterRequestSchema =
+  ObjectiveParameterDataSchema;
+export const UpdateObjectiveParameterRequestSchema =
+  ObjectiveParameterDataSchema.partial();
+
+// Response schema (includes MongoDB fields)
+export const ObjectiveParameterResponseSchema = z.object({
+  id: z.string(),
+  key: z.string(),
+  value: z.string(),
+  objectiveId: z.string(),
+});
+
+// =============================================================================
+// TARGET SCHEMAS
+// =============================================================================
+
+export const TargetDataSchema = z.object({
+  location: z.string().default('United States'),
+  language: z.string().default('English'),
+  personaId: ObjectIdSchema,
+  executionId: ObjectIdSchema,
+  objectiveId: ObjectIdSchema.optional(),
+});
+
+// Request schemas
+export const CreateTargetRequestSchema = TargetDataSchema;
+export const UpdateTargetRequestSchema = TargetDataSchema.partial();
+
+// Response schema (includes MongoDB fields)
+export const TargetResponseSchema = z.object({
+  id: z.string(),
+  location: z.string(),
+  language: z.string(),
+  personaId: z.string(),
+  executionId: z.string(),
+  objectiveId: z.string().nullable(),
 });
 
 // =============================================================================
@@ -170,6 +248,7 @@ export const ProductResponseSchema = BaseDocumentSchema.extend({
 
 // Core objective business data (client input)
 export const ObjectiveDataSchema = z.object({
+  type: ObjectiveTypeEnum,
   title: z
     .string()
     .min(1, 'Objective title is required')
@@ -178,7 +257,6 @@ export const ObjectiveDataSchema = z.object({
     .string()
     .min(1, 'Description is required')
     .max(2000, 'Description too long'),
-  type: ObjectiveTypeEnum,
   models: z.array(LLMModelEnum).min(1, 'At least one LLM model is required'),
   partnerId: ObjectIdSchema.optional(),
 });
@@ -192,59 +270,75 @@ export const UpdateObjectiveRequestSchema =
 
 // Response schema (includes MongoDB fields)
 export const ObjectiveResponseSchema = BaseDocumentSchema.extend({
+  type: ObjectiveTypeEnum,
   title: z.string(),
   description: z.string(),
-  type: ObjectiveTypeEnum,
   models: z.array(LLMModelEnum),
   partnerId: z.string().nullable(),
 });
 
 // =============================================================================
-// EVALUATION SCHEMAS
+// ANSWER SCHEMAS
 // =============================================================================
 
-// Core evaluation business data (client input)
-export const EvaluationDataSchema = z.object({
-  llmModel: LLMModelEnum,
-  prompt: z.string().min(1, 'Prompt is required'),
-  response: z.string().min(1, 'Response is required'),
-  score: z.number().min(0).max(100).optional(),
-  mentionFound: z.boolean().optional(),
-  ranking: z.number().int().positive().optional(),
-  totalCompetitors: z.number().int().nonnegative().optional(),
-  recommendationLikelihood: z.number().min(0).max(100).optional(),
-  competitiveStrengths: z.string().optional(),
-  competitiveWeaknesses: z.string().optional(),
-  marketPosition: z.string().optional(),
-  keyDifferentiators: z.string().optional(),
-  evaluation: z.string().optional(),
-  objectiveId: ObjectIdSchema,
-  partnerId: ObjectIdSchema,
-  productId: ObjectIdSchema,
+export const AnswerDataSchema = z.object({
+  originalQuestion: z.string().min(1, 'Original question is required'),
+  answerText: z.string().min(1, 'Answer text is required'),
+  model: LLMModelEnum,
+  tokensUsed: z.number().int().positive().optional(),
+  processingTime: z.number().int().positive().optional(),
+  questionId: ObjectIdSchema,
+  executionId: ObjectIdSchema,
 });
 
 // Request schemas
-export const CreateEvaluationRequestSchema = EvaluationDataSchema;
+export const CreateAnswerRequestSchema = AnswerDataSchema;
 
-// Response schema (includes MongoDB fields + status)
-export const EvaluationResponseSchema = BaseDocumentSchema.extend({
-  llmModel: LLMModelEnum,
-  prompt: z.string(),
-  response: z.string(),
-  score: z.number().nullable(),
-  mentionFound: z.boolean().nullable(),
+// Response schema (includes MongoDB fields)
+export const AnswerResponseSchema = z.object({
+  id: z.string(),
+  originalQuestion: z.string(),
+  answerText: z.string(),
+  model: LLMModelEnum,
+  tokensUsed: z.number().nullable(),
+  processingTime: z.number().nullable(),
+  questionId: z.string(),
+  executionId: z.string(),
+  createdAt: z.string().datetime(),
+});
+
+// =============================================================================
+// INSIGHT SCHEMAS
+// =============================================================================
+
+export const InsightDataSchema = z.object({
+  mentioned: z.boolean().default(false),
+  ranking: z.number().int().positive().optional(),
+  totalItems: z.number().int().nonnegative().optional(),
+  mentionContext: z.string().optional(),
+  strengths: z.array(z.string()).default([]),
+  weaknesses: z.array(z.string()).default([]),
+  confidence: z.number().min(0).max(1).optional(),
+  answerId: ObjectIdSchema,
+  executionId: ObjectIdSchema,
+});
+
+// Request schemas
+export const CreateInsightRequestSchema = InsightDataSchema;
+
+// Response schema (includes MongoDB fields)
+export const InsightResponseSchema = z.object({
+  id: z.string(),
+  mentioned: z.boolean(),
   ranking: z.number().nullable(),
-  totalCompetitors: z.number().nullable(),
-  recommendationLikelihood: z.number().nullable(),
-  competitiveStrengths: z.string().nullable(),
-  competitiveWeaknesses: z.string().nullable(),
-  marketPosition: z.string().nullable(),
-  keyDifferentiators: z.string().nullable(),
-  evaluation: z.string().nullable(),
-  status: EvaluationStatusEnum,
-  objectiveId: z.string(),
-  partnerId: z.string(),
-  productId: z.string(),
+  totalItems: z.number().nullable(),
+  mentionContext: z.string().nullable(),
+  strengths: z.array(z.string()),
+  weaknesses: z.array(z.string()),
+  confidence: z.number().nullable(),
+  answerId: z.string(),
+  executionId: z.string(),
+  createdAt: z.string().datetime(),
 });
 
 // =============================================================================
@@ -254,20 +348,18 @@ export const EvaluationResponseSchema = BaseDocumentSchema.extend({
 export const DashboardStatsSchema = z.object({
   totalPartners: z.number().int().nonnegative(),
   activeObjectives: z.number().int().nonnegative(),
-  totalEvaluations: z.number().int().nonnegative(),
+  totalExecutions: z.number().int().nonnegative(),
   successRate: z.number().min(0).max(100),
 });
 
-export const RecentEvaluationSchema = z.object({
+export const RecentExecutionSchema = z.object({
   id: z.string(),
   partnerName: z.string(),
   productName: z.string(),
   objectiveTitle: z.string(),
-  modelCount: z.number().int().nonnegative(),
-  totalModels: z.number().int().positive(),
-  avgScore: z.number().min(0).max(100).optional(),
-  status: EvaluationStatusEnum,
-  createdAt: z.string().datetime(),
+  status: ExecutionStatusEnum,
+  startedAt: z.string().datetime(),
+  completedAt: z.string().datetime().nullable(),
 });
 
 // =============================================================================
@@ -314,7 +406,7 @@ export type PartnerType = z.infer<typeof PartnerTypeEnum>;
 export type ProductType = z.infer<typeof ProductTypeEnum>;
 export type ObjectiveType = z.infer<typeof ObjectiveTypeEnum>;
 export type LLMModel = z.infer<typeof LLMModelEnum>;
-export type EvaluationStatus = z.infer<typeof EvaluationStatusEnum>;
+export type ExecutionStatus = z.infer<typeof ExecutionStatusEnum>;
 
 // Partner types
 export type PartnerData = z.infer<typeof PartnerDataSchema>;
@@ -339,16 +431,58 @@ export type UpdateObjectiveRequest = z.infer<
 >;
 export type ObjectiveResponse = z.infer<typeof ObjectiveResponseSchema>;
 
-// Evaluation types
-export type EvaluationData = z.infer<typeof EvaluationDataSchema>;
-export type CreateEvaluationRequest = z.infer<
-  typeof CreateEvaluationRequestSchema
+// Persona types
+export type PersonaData = z.infer<typeof PersonaDataSchema>;
+export type CreatePersonaRequest = z.infer<typeof CreatePersonaRequestSchema>;
+export type UpdatePersonaRequest = z.infer<typeof UpdatePersonaRequestSchema>;
+export type PersonaResponse = z.infer<typeof PersonaResponseSchema>;
+
+// Execution types
+export type ExecutionData = z.infer<typeof ExecutionDataSchema>;
+export type CreateExecutionRequest = z.infer<
+  typeof CreateExecutionRequestSchema
 >;
-export type EvaluationResponse = z.infer<typeof EvaluationResponseSchema>;
+export type ExecutionResponse = z.infer<typeof ExecutionResponseSchema>;
+
+// Answer types
+export type AnswerData = z.infer<typeof AnswerDataSchema>;
+export type CreateAnswerRequest = z.infer<typeof CreateAnswerRequestSchema>;
+export type AnswerResponse = z.infer<typeof AnswerResponseSchema>;
+
+// Insight types
+export type InsightData = z.infer<typeof InsightDataSchema>;
+export type CreateInsightRequest = z.infer<typeof CreateInsightRequestSchema>;
+export type InsightResponse = z.infer<typeof InsightResponseSchema>;
+
+// Question types
+export type QuestionData = z.infer<typeof QuestionDataSchema>;
+export type CreateQuestionRequest = z.infer<typeof CreateQuestionRequestSchema>;
+export type UpdateQuestionRequest = z.infer<typeof UpdateQuestionRequestSchema>;
+export type QuestionResponse = z.infer<typeof QuestionResponseSchema>;
+
+// ObjectiveParameter types
+export type ObjectiveParameterData = z.infer<
+  typeof ObjectiveParameterDataSchema
+>;
+export type CreateObjectiveParameterRequest = z.infer<
+  typeof CreateObjectiveParameterRequestSchema
+>;
+export type UpdateObjectiveParameterRequest = z.infer<
+  typeof UpdateObjectiveParameterRequestSchema
+>;
+export type ObjectiveParameterResponse = z.infer<
+  typeof ObjectiveParameterResponseSchema
+>;
+
+// Target types
+export type TargetData = z.infer<typeof TargetDataSchema>;
+export type CreateTargetRequest = z.infer<typeof CreateTargetRequestSchema>;
+export type UpdateTargetRequest = z.infer<typeof UpdateTargetRequestSchema>;
+export type TargetResponse = z.infer<typeof TargetResponseSchema>;
 
 // Dashboard types
 export type DashboardStats = z.infer<typeof DashboardStatsSchema>;
-export type RecentEvaluation = z.infer<typeof RecentEvaluationSchema>;
+export type RecentExecution = z.infer<typeof RecentExecutionSchema>;
 
 // Utility types
 export type IdParams = z.infer<typeof IdParamsSchema>;

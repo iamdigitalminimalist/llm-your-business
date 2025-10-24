@@ -43,7 +43,7 @@ export const objectiveController = {
       console.info(`✅ Objective created successfully:`, {
         id: objective.id,
         title: objective.title,
-        partner: objective.partner?.name,
+        partnerId: objective.partnerId,
       });
 
       res.status(201).json(
