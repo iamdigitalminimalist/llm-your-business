@@ -7,147 +7,217 @@ async function main() {
   await connectDatabase();
 
   try {
-    // Clean existing data
+    // Clean existing data in proper order (respecting foreign keys)
     await prisma.insight.deleteMany();
     await prisma.answer.deleteMany();
     await prisma.target.deleteMany();
     await prisma.execution.deleteMany();
+    await prisma.objectiveParameter.deleteMany();
     await prisma.question.deleteMany();
     await prisma.objective.deleteMany();
     await prisma.product.deleteMany();
     await prisma.partner.deleteMany();
+    await prisma.persona.deleteMany();
     console.log('🧹 Cleaned existing data');
   } catch (error) {
     console.log('⚠️ Skipping cleanup (collections may not exist yet)');
   }
 
-  // Create Website Builder Partners (Market Leaders)
-  const wix = await prisma.partner.create({
+  // Create 3 Persona types first
+  const creativeFreelancerPersona = await prisma.persona.create({
+    data: {
+      name: 'The Creative Freelancer',
+      description:
+        'Creative professionals who need to showcase their work and attract clients',
+      occupation: ['Designer', 'Photographer', 'Writer', 'Content Creator'],
+      technicalSkills: 'Low-to-medium',
+      goals: [
+        'Showcase their portfolio professionally',
+        'Attract new clients',
+        'Establish a strong online presence',
+        'Sell services directly online',
+      ],
+      motivations: [
+        'Build credibility and trust with potential clients',
+        'Increase income through online visibility',
+        'Stand out from competition',
+        'Work with higher-quality clients',
+      ],
+    },
+  });
+
+  const smallBusinessOwnerPersona = await prisma.persona.create({
+    data: {
+      name: 'The Small Business Owner',
+      description: 'Local business owners seeking to establish online presence',
+      occupation: [
+        'Local Business Owner',
+        'Service Provider',
+        'Retailer',
+        'Consultant',
+      ],
+      technicalSkills: 'Beginner-to-low',
+      goals: [
+        'Establish online presence for local business',
+        'Generate leads and drive sales',
+        'Provide information about services/products',
+        'Build customer trust and credibility',
+      ],
+      motivations: [
+        'Compete with larger businesses online',
+        'Reach customers outside of local area',
+        'Reduce dependency on foot traffic',
+        'Modernize business operations',
+      ],
+    },
+  });
+
+  const aspiringStartupFounderPersona = await prisma.persona.create({
+    data: {
+      name: 'The Aspiring Startup Founder',
+      description:
+        'Entrepreneurs looking to launch their business ideas quickly',
+      occupation: [
+        'Entrepreneur',
+        'Business Student',
+        'Corporate Employee',
+        'First-time Founder',
+      ],
+      technicalSkills: 'Medium-to-high',
+      goals: [
+        'Launch MVP quickly and cost-effectively',
+        'Validate business idea with landing page',
+        'Build email list of potential customers',
+        'Attract investors and partners',
+      ],
+      motivations: [
+        'Turn business idea into reality',
+        'Prove market demand for their concept',
+        'Build something meaningful and profitable',
+        'Achieve financial independence',
+      ],
+    },
+  });
+
+  console.log('✅ Created 3 persona types');
+
+  // Create 5 Website Builder Partners
+  const wixPartner = await prisma.partner.create({
     data: {
       name: 'Wix',
-      description:
-        'Leading cloud-based website development platform with drag-and-drop functionality',
+      description: 'All-in-one website builder with drag & drop functionality',
       partnerType: $Enums.PartnerType.TECH_COMPANY,
-      website: 'https://wix.com',
-      country: 'US',
-      industry: 'Website Building',
+      website: 'https://www.wix.com',
+      country: 'IL',
+      industry: 'Website Builder',
       isActive: true,
     },
   });
 
-  const webflow = await prisma.partner.create({
+  const webflowPartner = await prisma.partner.create({
     data: {
       name: 'Webflow',
-      description:
-        'Professional website builder with advanced design capabilities and CMS',
+      description: 'Professional website builder for designers and developers',
       partnerType: $Enums.PartnerType.TECH_COMPANY,
       website: 'https://webflow.com',
       country: 'US',
-      industry: 'Website Building',
+      industry: 'Website Builder',
       isActive: true,
     },
   });
 
-  const elementor = await prisma.partner.create({
+  const elementorPartner = await prisma.partner.create({
     data: {
       name: 'Elementor',
-      description:
-        'Leading WordPress page builder with drag-and-drop visual editor',
+      description: 'WordPress website builder with visual drag & drop editor',
       partnerType: $Enums.PartnerType.TECH_COMPANY,
       website: 'https://elementor.com',
-      country: 'US',
-      industry: 'Website Building',
+      country: 'IL',
+      industry: 'WordPress Plugins',
       isActive: true,
     },
   });
 
-  const shopify = await prisma.partner.create({
+  const shopifyPartner = await prisma.partner.create({
     data: {
       name: 'Shopify',
       description:
-        'Leading e-commerce platform for online stores and retail point-of-sale systems',
+        'E-commerce platform for online stores and retail point-of-sale systems',
       partnerType: $Enums.PartnerType.TECH_COMPANY,
       website: 'https://shopify.com',
       country: 'CA',
-      industry: 'E-commerce',
+      industry: 'E-commerce Platform',
       isActive: true,
     },
   });
 
-  const squarespace = await prisma.partner.create({
+  const squarespacePartner = await prisma.partner.create({
     data: {
       name: 'Squarespace',
-      description:
-        'All-in-one website builder with beautiful templates and integrated e-commerce',
+      description: 'All-in-one platform for building beautiful websites',
       partnerType: $Enums.PartnerType.TECH_COMPANY,
       website: 'https://squarespace.com',
       country: 'US',
-      industry: 'Website Building',
+      industry: 'Website Builder',
       isActive: true,
     },
   });
 
-  console.log(
-    '✅ Created website builder partners: Wix, Webflow, Elementor, Shopify, Squarespace'
-  );
+  console.log('✅ Created 5 website builder partners');
 
-  // Create Products
-  const wixWebsiteBuilder = await prisma.product.create({
+  // Create products for each partner
+  const wixProduct = await prisma.product.create({
     data: {
       name: 'Wix Website Builder',
-      description:
-        'Drag-and-drop website builder with AI-powered design assistance',
+      description: 'Drag & drop website builder with templates',
       productType: $Enums.ProductType.WEBSITE_BUILDER,
+      partnerId: wixPartner.id,
       isActive: true,
-      partnerId: wix.id,
     },
   });
 
-  const webflowBuilder = await prisma.product.create({
+  const webflowProduct = await prisma.product.create({
     data: {
       name: 'Webflow Designer',
-      description:
-        'Professional web design platform with visual CSS editing and CMS',
+      description: 'Professional website builder for designers',
       productType: $Enums.ProductType.WEBSITE_BUILDER,
+      partnerId: webflowPartner.id,
       isActive: true,
-      partnerId: webflow.id,
     },
   });
 
-  const elementorBuilder = await prisma.product.create({
+  const elementorProduct = await prisma.product.create({
     data: {
       name: 'Elementor Pro',
-      description:
-        'Advanced WordPress page builder with professional widgets and templates',
+      description: 'WordPress page builder with advanced widgets',
       productType: $Enums.ProductType.WEBSITE_BUILDER,
+      partnerId: elementorPartner.id,
       isActive: true,
-      partnerId: elementor.id,
     },
   });
 
-  const shopifyStore = await prisma.product.create({
+  const shopifyProduct = await prisma.product.create({
     data: {
       name: 'Shopify Online Store',
-      description:
-        'Complete e-commerce solution with payment processing and inventory management',
+      description: 'Complete e-commerce platform with built-in website builder',
       productType: $Enums.ProductType.ECOMMERCE_PLATFORM,
+      partnerId: shopifyPartner.id,
       isActive: true,
-      partnerId: shopify.id,
     },
   });
 
-  const squarespaceBuilder = await prisma.product.create({
+  const squarespaceProduct = await prisma.product.create({
     data: {
-      name: 'Squarespace Website Builder',
+      name: 'Squarespace Website',
       description:
-        'Beautiful, responsive website builder with integrated blogging and e-commerce',
+        'All-in-one website building platform with designer templates',
       productType: $Enums.ProductType.WEBSITE_BUILDER,
+      partnerId: squarespacePartner.id,
       isActive: true,
-      partnerId: squarespace.id,
     },
   });
 
-  console.log('✅ Created website builder products');
+  console.log('✅ Created products for partners');
 
   // Create Static Objectives (these are template objectives)
   const top5Objective = await prisma.objective.create({
@@ -156,8 +226,6 @@ async function main() {
       title: 'Top 5 Recommendations',
       description:
         'Analyze and rank the top 5 solutions in a specific category based on features, usability, pricing, and overall value. Provide detailed reasoning for each ranking position and highlight key differentiators.',
-      expectedAnswerFormat:
-        'Provide a numbered list from 1-5 with each item including: name, brief description, key strengths, and why it deserves its ranking position.',
       models: [$Enums.LLMModel.GPT_4O],
       isActive: true,
     },
@@ -169,8 +237,6 @@ async function main() {
       title: 'Competitor Analysis',
       description:
         'Comprehensive competitive landscape analysis including market positioning, strengths, weaknesses, and competitive advantages. Compare direct and indirect competitors in the market.',
-      expectedAnswerFormat:
-        'Provide structured analysis with competitor names, market position, key strengths, weaknesses, and competitive differentiation.',
       models: [$Enums.LLMModel.GPT_4O],
       isActive: true,
     },
@@ -182,8 +248,6 @@ async function main() {
       title: 'Pros and Cons Analysis',
       description:
         'Balanced evaluation of advantages and disadvantages for specific solutions or products. Include both user perspective and business considerations.',
-      expectedAnswerFormat:
-        'Provide clear pros and cons lists with explanations for each point, concluding with overall assessment.',
       models: [$Enums.LLMModel.GPT_4O],
       isActive: true,
     },
@@ -318,8 +382,8 @@ async function main() {
   // Create a sample execution to demonstrate the complete flow
   const sampleExecution = await prisma.execution.create({
     data: {
-      partnerId: wix.id,
-      productId: wixWebsiteBuilder.id,
+      partnerId: wixPartner.id,
+      productId: wixProduct.id,
       objectiveId: top5Objective.id,
       status: $Enums.ExecutionStatus.PENDING,
     },
@@ -328,89 +392,31 @@ async function main() {
   // Create 3 Target Personas for the sample execution
   const targetCreativeFreelancer = await prisma.target.create({
     data: {
-      persona: 'The Creative Freelancer',
-      occupation: ['Designer', 'Photographer', 'Writer', 'Content Creator'],
-      technicalSkills: 'Low-to-medium',
-      goals: [
-        'Showcase their portfolio professionally',
-        'Attract new clients',
-        'Establish a strong online presence',
-        'Sell services directly online',
-      ],
-      motivations: [
-        'Build credibility and trust with potential clients',
-        'Increase income through online visibility',
-        'Stand out from competition',
-        'Work with higher-quality clients',
-      ],
       location: 'United States',
       language: 'English',
-      useCase:
-        'creating a portfolio website to showcase work and attract clients',
-      budget: 'under $50/month',
+      personaId: creativeFreelancerPersona.id,
       executionId: sampleExecution.id,
+      objectiveId: top5Objective.id,
     },
   });
 
   const targetSmallBusinessOwner = await prisma.target.create({
     data: {
-      persona: 'The Small Business Owner',
-      occupation: [
-        'Local Business Owner',
-        'Service Provider',
-        'Retailer',
-        'Consultant',
-      ],
-      technicalSkills: 'Beginner-to-low',
-      goals: [
-        'Establish online presence for local business',
-        'Generate leads and drive sales',
-        'Provide information about services/products',
-        'Build customer trust and credibility',
-      ],
-      motivations: [
-        'Compete with larger businesses online',
-        'Reach customers outside of local area',
-        'Reduce dependency on foot traffic',
-        'Modernize business operations',
-      ],
       location: 'United States',
       language: 'English',
-      useCase:
-        'creating a business website to attract local customers and grow online',
-      budget: '$25-100/month',
+      personaId: smallBusinessOwnerPersona.id,
       executionId: sampleExecution.id,
+      objectiveId: top5Objective.id,
     },
   });
 
   const targetAspiringStartupFounder = await prisma.target.create({
     data: {
-      persona: 'The Aspiring Startup Founder',
-      occupation: [
-        'Entrepreneur',
-        'Business Student',
-        'Corporate Employee',
-        'First-time Founder',
-      ],
-      technicalSkills: 'Medium-to-high',
-      goals: [
-        'Launch MVP quickly and cost-effectively',
-        'Validate business idea with landing page',
-        'Build email list of potential customers',
-        'Attract investors and partners',
-      ],
-      motivations: [
-        'Turn business idea into reality',
-        'Prove market demand for their concept',
-        'Build something meaningful and profitable',
-        'Achieve financial independence',
-      ],
       location: 'United States',
       language: 'English',
-      useCase:
-        'creating a startup landing page to validate business idea and collect leads',
-      budget: '$10-75/month initially, scaling up',
+      personaId: aspiringStartupFounderPersona.id,
       executionId: sampleExecution.id,
+      objectiveId: top5Objective.id,
     },
   });
 
