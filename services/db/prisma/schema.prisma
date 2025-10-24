@@ -65,6 +65,7 @@ model Partner {
 
   products   Product[]
   executions Execution[]
+  Objective  Objective[]
 
   @@map("partners")
 }
@@ -82,7 +83,9 @@ model Product {
   partnerId String  @db.ObjectId
   partner   Partner @relation(fields: [partnerId], references: [id])
 
-  executions Execution[]
+  executions  Execution[]
+  Objective   Objective?  @relation(fields: [objectiveId], references: [id])
+  objectiveId String?     @db.ObjectId
 
   @@map("products")
 }
@@ -95,15 +98,19 @@ model Objective {
   title       String // "Top 5 Recommendations"
   description String // Comprehensive description for LLM context
 
-  // Static configuration
-  expectedAnswerFormat String // "Provide a numbered list of 5 items with brief explanations"
-  models               LLMModel[] // Default models to use
-
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  questions  Question[]
-  executions Execution[]
+  models              LLMModel[]
+  targets             Target[]
+  objectiveParameters ObjectiveParameter[]
+  questions           Question[]
+  executions          Execution[]
+
+  partnerId String?  @db.ObjectId
+  partner   Partner? @relation(fields: [partnerId], references: [id])
+
+  products Product[]
 
   @@map("objectives")
 }
@@ -123,25 +130,48 @@ model Question {
   @@map("questions")
 }
 
-// 5. Target - Configuration for question template filling
-model Target {
+model ObjectiveParameter {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  persona         String // "The Creative Freelancer"
+  key   String // e.g., "rank"
+  value String // e.g., "1-5"
+
+  objectiveId String    @db.ObjectId
+  objective   Objective @relation(fields: [objectiveId], references: [id])
+
+  @@map("objective_parameters")
+}
+
+model Persona {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  name        String // "The Creative Freelancer"
+  description String?
+
   occupation      String[] // ["Designer", "Photographer", "Writer"]
   technicalSkills String // "Low-to-medium"
   goals           String[] // ["Showcase portfolio", "attract clients"]
   motivations     String[] // ["Build professional presence", "Increase income"]
 
+  createdAt DateTime @default(now())
+  targets   Target[]
+
+  @@map("personas")
+}
+
+model Target {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
   location String @default("United States")
   language String @default("English")
 
-  // Additional context
-  useCase String? // "creating an online store"
-  budget  String? // "under $100/month"
+  personaId   String @db.ObjectId
+  executionId String @db.ObjectId
 
-  executionId String    @db.ObjectId
-  execution   Execution @relation(fields: [executionId], references: [id])
+  persona     Persona    @relation(fields: [personaId], references: [id])
+  execution   Execution  @relation(fields: [executionId], references: [id])
+  objective   Objective? @relation(fields: [objectiveId], references: [id])
+  objectiveId String?    @db.ObjectId
 
   @@map("targets")
 }
