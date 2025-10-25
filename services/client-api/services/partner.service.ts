@@ -5,6 +5,7 @@ import type {
   CreatePartnerRequest,
   UpdatePartnerRequest,
 } from '@shared/db/api-types';
+import type { Product } from '@shared/db/types';
 
 export const partnerService = {
   getPartners: async (
@@ -32,8 +33,9 @@ export const partnerService = {
     return {
       ...partner,
       productCount: partner.products?.length || 0,
-      evaluationCount: partner.evaluations?.length || 0,
-      hasActiveProducts: partner.products?.some((p) => p.isActive) || false,
+      executionCount: partner.executions?.length || 0,
+      hasActiveProducts:
+        partner.products?.some((p: Product) => p.isActive) || false,
     };
   },
 

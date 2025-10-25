@@ -1,5 +1,6 @@
 import type { ObjectId } from 'mongodb';
 import { productRepository } from '../repositories/product.repository';
+import type { ProductType } from '@shared/db/types';
 
 export const productService = {
   getProducts: async () => {
@@ -21,8 +22,17 @@ export const productService = {
 
     return {
       ...product,
-      evaluationCount: product.evaluations?.length || 0,
-      hasEvaluations: (product.evaluations?.length || 0) > 0,
+      executionCount: product.executions?.length || 0,
+      hasExecutions: (product.executions?.length || 0) > 0,
     };
+  },
+
+  createProduct: async (data: {
+    name: string;
+    description?: string;
+    productType: ProductType;
+    partnerId: string;
+  }) => {
+    return productRepository.createProduct(data);
   },
 };

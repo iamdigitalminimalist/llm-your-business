@@ -27,38 +27,23 @@ export const objectiveController = {
 
   createObjective: async (req: Request, res: Response) => {
     try {
-      const body = toCamel(req.body as any);
-      const { title, question, partnerId, productId, llmModels } = body;
+      // Convert snake_case to camelCase for validation
+      const body = toCamel(req.body);
 
       console.info('🎯 Creating new objective...', {
-        title,
-        partnerId,
-        productId,
-        modelCount: llmModels?.length || 0,
+        title: body.title,
+        type: body.type,
+        partnerId: body.partnerId,
+        modelCount: body.models?.length || 0,
       });
 
-      // Validate required fields
-      if (!title || !question || !partnerId || !productId || !llmModels) {
-        return res.status(400).json({
-          error: 'Invalid request',
-          message:
-            'title, question, partnerId, productId, and llmModels are required',
-        });
-      }
-
-      const objective = await objectiveService.createObjective({
-        title,
-        question,
-        partnerId,
-        productId,
-        llmModels,
-      });
+      // Pass raw body to service for Zod validation
+      const objective = await objectiveService.createObjective(body);
 
       console.info(`✅ Objective created successfully:`, {
         id: objective.id,
         title: objective.title,
-        partner: objective.partner?.name,
-        product: objective.product?.name,
+        partnerId: objective.partnerId,
       });
 
       res.status(201).json(
@@ -73,8 +58,17 @@ export const objectiveController = {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error occurred';
 
-      res.status(500).json({
-        error: 'Failed to create objective',
+      // Check if it's a validation error
+      const statusCode =
+        error instanceof Error && error.message.includes('validation')
+          ? 400
+          : 500;
+
+      res.status(statusCode).json({
+        error:
+          statusCode === 400
+            ? 'Validation Error'
+            : 'Failed to create objective',
         message: errorMessage,
       });
     }

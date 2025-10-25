@@ -6,7 +6,7 @@ import { toCamel, toSnake } from '../lib/case';
 export const productController = {
   getProducts: async (req: Request, res: Response) => {
     try {
-      const { partnerId } = toCamel(req.query as any) as { partnerId?: string };
+      const { partnerId } = toCamel(req.query);
       console.info('🔍 Looking for products...', { partnerId });
 
       let products;
@@ -98,6 +98,63 @@ export const productController = {
           message: 'Failed to fetch product data',
         })
       );
+    }
+  },
+
+  createProduct: async (req: Request, res: Response) => {
+    try {
+      const body = toCamel(req.body);
+      const { name, description, productType, partnerId } = body;
+
+      console.info('📦 Creating new product...', {
+        name,
+        partnerId,
+        productType,
+      });
+
+      // Validate required fields
+      if (!name || !productType || !partnerId) {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message: 'name, productType, and partnerId are required',
+        });
+      }
+
+      if (!ObjectId.isValid(partnerId)) {
+        return res.status(400).json({
+          error: 'Invalid partner ID format',
+          message: 'Partner ID must be a valid MongoDB ObjectId',
+        });
+      }
+
+      const product = await productService.createProduct({
+        name,
+        description,
+        productType,
+        partnerId,
+      });
+
+      console.info(`✅ Product created successfully:`, {
+        id: product.id,
+        name: product.name,
+      });
+
+      res.status(201).json(
+        toSnake({
+          success: true,
+          data: product,
+        })
+      );
+    } catch (error) {
+      console.error('Error creating product:', error);
+
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error occurred';
+
+      res.status(500).json({
+        error: 'Failed to create product',
+        message: errorMessage,
+      });
     }
   },
 };

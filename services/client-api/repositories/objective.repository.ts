@@ -1,4 +1,4 @@
-import type { LLMModel } from '@shared/db/types';
+import type { CreateObjectiveRequest } from '@shared/db/api-types';
 import { prisma } from '@shared/db';
 
 export const objectiveRepository = {
@@ -6,14 +6,12 @@ export const objectiveRepository = {
     return prisma.objective.findMany({
       include: {
         partner: {
-          select: { id: true, name: true, publicId: true },
-        },
-        product: {
-          select: { id: true, name: true, publicId: true },
+          select: { id: true, name: true },
         },
         _count: {
           select: {
-            evaluations: true,
+            executions: true,
+            questions: true,
           },
         },
       },
@@ -23,41 +21,27 @@ export const objectiveRepository = {
   getObjectiveById: async (id: string) => {
     return prisma.objective.findUnique({
       where: { id },
-      select: {
-        id: true,
-        publicId: true,
-        title: true,
-        question: true,
-        partnerId: true,
-        productId: true,
-        isActive: true,
-        llmModels: true,
+      include: {
+        partner: true,
+        questions: true,
+        objectiveParameters: true,
       },
     });
   },
 
-  createObjective: async (data: {
-    title: string;
-    question: string;
-    partnerId: string;
-    productId: string;
-    llmModels: LLMModel[];
-  }) => {
+  createObjective: async (data: CreateObjectiveRequest) => {
     return prisma.objective.create({
       data: {
         title: data.title,
-        question: data.question,
+        description: data.description,
+        type: data.type,
+        models: data.models,
         partnerId: data.partnerId,
-        productId: data.productId,
-        llmModels: data.llmModels,
         isActive: true,
       },
       include: {
         partner: {
-          select: { id: true, name: true, publicId: true },
-        },
-        product: {
-          select: { id: true, name: true, publicId: true },
+          select: { id: true, name: true },
         },
       },
     });
